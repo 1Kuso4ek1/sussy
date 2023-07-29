@@ -15,15 +15,15 @@ public:
             if(children.empty())
                 return expression;
 
+            auto leftRet = children[0]->GetReturn();
+            auto rightRet = children.back()->GetReturn();
+
             switch(expression.first)
             {
-                case Lexer::Lexeme::Plus:
-                {
-                    auto leftRet = children[0]->GetReturn();
-                    auto rightRet = children.back()->GetReturn();
-
-                    return Add(leftRet, rightRet);
-                }
+            case Lexer::Lexeme::Plus: return Add(leftRet, rightRet); break;
+            case Lexer::Lexeme::Minus: return Subtract(leftRet, rightRet); break;
+            case Lexer::Lexeme::Multiply: return Multiply(leftRet, rightRet); break;
+            case Lexer::Lexeme::Divide: return Divide(leftRet, rightRet); break;
             }
 
             return { Lexer::Lexeme::None, "" };

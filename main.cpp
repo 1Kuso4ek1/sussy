@@ -9,26 +9,21 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
 
     switch (node->expression.first)
     {
-    case Lexer::Lexeme::None:
-        std::cout << "Expression: { Lexeme::None, " << node->expression.second << " }" << std::endl;
-        break;
-
-    case Lexer::Lexeme::Plus:
-        std::cout << "Expression: { Lexeme::Plus, " << node->expression.second << " }" << std::endl;
-        break;
-    
-    case Lexer::Lexeme::Int:
-        std::cout << "Expression: { Lexeme::Int, " << node->expression.second << " }" << std::endl;
-        break;
-    
-    default:
-        break;
+    case Lexer::Lexeme::None: std::cout << "Expression: { Lexeme::None, "; break;
+    case Lexer::Lexeme::Plus: std::cout << "Expression: { Lexeme::Plus, "; break;
+    case Lexer::Lexeme::Minus: std::cout << "Expression: { Lexeme::Minus, "; break;
+    case Lexer::Lexeme::Multiply: std::cout << "Expression: { Lexeme::Multiply, "; break;
+    case Lexer::Lexeme::Divide: std::cout << "Expression: { Lexeme::Divide, "; break;
+    case Lexer::Lexeme::Int: std::cout << "Expression: { Lexeme::Int, "; break;
+    case Lexer::Lexeme::Float: std::cout << "Expression: { Lexeme::Float, "; break;
+    case Lexer::Lexeme::String: std::cout << "Expression: { Lexeme::String, "; break;
+    default: break;
     }
+
+    std::cout << node->expression.second << " }" << std::endl;
 
     for(auto i : node->children)
-    {
         PrintAST(i, depth + 1);
-    }
 }
 
 int main(int argc, char** argv)

@@ -14,10 +14,15 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             break;
 
         case Lexer::Lexeme::Int:
+        case Lexer::Lexeme::Float:
+        case Lexer::Lexeme::String:
             currentNode->expression = *i;
             break;
 
         case Lexer::Lexeme::Plus:
+        case Lexer::Lexeme::Minus:
+        case Lexer::Lexeme::Multiply:
+        case Lexer::Lexeme::Divide:
             currentNode->expression = *i;
             currentNode->children.emplace_back(std::make_shared<Node>(*(i - 1)));
             currentNode->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));

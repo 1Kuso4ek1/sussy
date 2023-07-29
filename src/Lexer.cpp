@@ -35,6 +35,9 @@ Lexer::Lexer(const std::string& input)
         case ';': single_char(Lexeme::Semicolon, i); break;
         case '=': single_char(Lexeme::Equal, i); break;
         case '+': single_char(Lexeme::Plus, i); break;
+        case '-': single_char(Lexeme::Minus, i); break;
+        case '*': single_char(Lexeme::Multiply, i); break;
+        case '/': single_char(Lexeme::Divide, i); break;
         case '('...')': single_char(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case 'A'...'z': 
@@ -43,7 +46,7 @@ Lexer::Lexer(const std::string& input)
             break;
         
         case '0'...'9':
-            if(res.first == Lexeme::Word || res.first == Lexeme::Int || opened_quote) res.second += i;
+            if(res.first == Lexeme::Word || res.first == Lexeme::Int || res.first == Lexeme::Float || opened_quote) res.second += i;
             else if(res.first == Lexeme::None) res = { Lexeme::Int, std::string(1, i) }; 
             break;
 
