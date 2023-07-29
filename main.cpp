@@ -46,5 +46,6 @@ int main(int argc, char** argv)
 
     PrintAST(ast.GetRootNode());
 
-    std::cout << ast.GetRootNode()->children[0]->GetReturn().second << std::endl;
+    for(auto i : ast.GetRootNode()->children)
+        std::cout << i->GetReturn().second << std::endl;
 }

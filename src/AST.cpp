@@ -28,6 +28,11 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             currentNode->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
             currentNode = currentNode->children.back();
             break;
+
+        case Lexer::Lexeme::Semicolon:
+            root->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
+            currentNode = root->children.back();
+            break;
         
         default:
             break;
