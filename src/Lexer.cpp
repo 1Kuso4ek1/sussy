@@ -3,20 +3,22 @@
 Lexer::Lexer(const std::string& input)
 {
     Lexer::Token res(Lexeme::None, "");
-    bool opened_quote = false;
-    auto add_and_clear = [&]()
+    bool openedQuote = false;
+    auto addAndClear = [&]()
     {
+        if(res.first == Lexeme::Word && std::find(reservedWords.begin(), reservedWords.end(), res.second) != reservedWords.end())
+            res.first = Lexeme::ReservedWord;
         if(res.first != Lexeme::None) tokens.push_back(res);
         res = { Lexeme::None, "" };
     };
 
-    auto single_char = [&](Lexeme t, char& i)
+    auto singleChar = [&](Lexeme t, char i)
     {
-        if(!opened_quote)
+        if(!openedQuote)
         {
-            add_and_clear();
+            addAndClear();
             res = { t, std::string(1, i) };
-            add_and_clear(); 
+            addAndClear(); 
         } else res.second += i;
     };
     
@@ -26,44 +28,44 @@ Lexer::Lexer(const std::string& input)
         {
         case '\"':
         case '\'':
-            opened_quote = !opened_quote;
+            openedQuote = !openedQuote;
             res.first = Lexeme::String;
             break;
 
         case '{':
-        case '}': single_char(i == '{' ? Lexeme::CurlyBraceOpen : Lexeme::CurlyBraceClose, i); break;
-        case ';': single_char(Lexeme::Semicolon, i); break;
-        case '=': single_char(Lexeme::Equal, i); break;
-        case '+': single_char(Lexeme::Plus, i); break;
-        case '-': single_char(Lexeme::Minus, i); break;
-        case '*': single_char(Lexeme::Multiply, i); break;
-        case '/': single_char(Lexeme::Divide, i); break;
-        case '('...')': single_char(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
+        case '}': singleChar(i == '{' ? Lexeme::CurlyBraceOpen : Lexeme::CurlyBraceClose, i); break;
+        case ';': singleChar(Lexeme::Semicolon, i); break;
+        case '=': singleChar(Lexeme::Equal, i); break;
+        case '+': singleChar(Lexeme::Plus, i); break;
+        case '-': singleChar(Lexeme::Minus, i); break;
+        case '*': singleChar(Lexeme::Multiply, i); break;
+        case '/': singleChar(Lexeme::Divide, i); break;
+        case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case 'A'...'z': 
-            if(res.first == Lexeme::Word || opened_quote) res.second += i;
+            if(res.first == Lexeme::Word || openedQuote) res.second += i;
             else if(res.first == Lexeme::None) res = { Lexeme::Word, std::string(1, i) }; 
             break;
         
         case '0'...'9':
-            if(res.first == Lexeme::Word || res.first == Lexeme::Int || res.first == Lexeme::Float || opened_quote) res.second += i;
+            if(res.first == Lexeme::Word || res.first == Lexeme::Int || res.first == Lexeme::Float || openedQuote) res.second += i;
             else if(res.first == Lexeme::None) res = { Lexeme::Int, std::string(1, i) }; 
             break;
 
         case '.':
             if(res.first == Lexeme::Int) { res.first = Lexeme::Float; res.second += i; }
-            else if(opened_quote) res.second += i;
+            else if(openedQuote) res.second += i;
             else if(res.first == Lexeme::None) res = { Lexeme::Dot, std::string(1, i) }; 
             break;
 
         default:
-            if(!opened_quote)
-                add_and_clear();
+            if(!openedQuote)
+                addAndClear();
             else res.second += i;
             break;
         }
     }
-    add_and_clear();
+    addAndClear();
 }
 
 std::vector<Lexer::Token> Lexer::Result()

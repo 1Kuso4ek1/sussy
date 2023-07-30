@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <algorithm>
+#include "Utils.hpp"
 
 class Lexer
 {
@@ -8,10 +10,11 @@ public:
     enum class Lexeme
     {
         None,
-        String,
         Word,
+        ReservedWord,
         Int,
         Float,
+        String,
         BraceOpen,
         BraceClose,
         CurlyBraceOpen,

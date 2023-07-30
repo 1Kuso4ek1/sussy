@@ -11,14 +11,13 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
         switch (i->first)
         {
         case Lexer::Lexeme::Word:
-            break;
-
         case Lexer::Lexeme::Int:
         case Lexer::Lexeme::Float:
         case Lexer::Lexeme::String:
             currentNode->expression = *i;
             break;
 
+        case Lexer::Lexeme::Equal:
         case Lexer::Lexeme::Plus:
         case Lexer::Lexeme::Minus:
         case Lexer::Lexeme::Multiply:
