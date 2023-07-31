@@ -32,8 +32,9 @@ Lexer::Lexer(const std::string& input)
             res.first = Lexeme::String;
             break;
 
-        case '{':
-        case '}': singleChar(i == '{' ? Lexeme::CurlyBraceOpen : Lexeme::CurlyBraceClose, i); break;
+        case '{': singleChar(Lexeme::CurlyBraceOpen, i); break;
+        case '}': singleChar(Lexeme::CurlyBraceClose, i); break;
+        case ',': singleChar(Lexeme::Comma, i); break;
         case ';': singleChar(Lexeme::Semicolon, i); break;
         case '=': singleChar(Lexeme::Equal, i); break;
         case '+': singleChar(Lexeme::Plus, i); break;

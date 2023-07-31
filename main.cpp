@@ -1,10 +1,10 @@
 #include <AST.hpp>
 #include <fstream>
 #include <iostream>
-#include <unordered_map>
 #include <Variable.hpp>
+#include <Function.hpp>
 
-std::unordered_map<std::string, Variable> variables;
+std::string lastAddedVar;
 
 void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
 {
@@ -14,6 +14,10 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     switch (node->expression.first)
     {
     case Lexer::Lexeme::None: std::cout << "Expression: { Lexeme::None, "; break;
+    case Lexer::Lexeme::BraceOpen: std::cout << "Expression: { Lexeme::BraceOpen, "; break;
+    case Lexer::Lexeme::BraceClose: std::cout << "Expression: { Lexeme::BraceClose, "; break;
+    case Lexer::Lexeme::CurlyBraceOpen: std::cout << "Expression: { Lexeme::CurlyBraceOpen, "; break;
+    case Lexer::Lexeme::CurlyBraceClose: std::cout << "Expression: { Lexeme::CurlyBraceClose, "; break;
     case Lexer::Lexeme::Word: std::cout << "Expression: { Lexeme::Word, "; break;
     case Lexer::Lexeme::Equal: std::cout << "Expression: { Lexeme::Equal, "; break;
     case Lexer::Lexeme::Plus: std::cout << "Expression: { Lexeme::Plus, "; break;
@@ -32,16 +36,19 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
         PrintAST(i, depth + 1);
 }
 
-Lexer::Token GetReturn(std::shared_ptr<AST::Node> node)
+Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, std::unordered_map<std::string, std::shared_ptr<Variable>>& vars = variables)
 {
     if(node->children.empty())
     {
         if(node->expression.first == Lexer::Lexeme::Word)
         {
-            auto it = variables.find(node->expression.second);
-            if(it == variables.end())
-                variables[node->expression.second] = Variable();
-            else return it->second.GetData();
+            auto it = vars.find(node->expression.second);
+            if(it == vars.end())
+            {
+                vars[node->expression.second] = std::make_shared<Variable>();
+                lastAddedVar = node->expression.second;
+            }
+            else return it->second->GetData();
         }
         return node->expression;
     }
@@ -49,21 +56,63 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node)
     Lexer::Token leftRet;
     Lexer::Token rightRet;
 
-    if(node->children.size() > 1)
+    if(node->children.size() == 2)
     {
-        leftRet = GetReturn(node->children[0]);
-        rightRet = GetReturn(node->children.back());
+        leftRet = GetReturn(node->children[0], vars);
+        rightRet = GetReturn(node->children.back(), vars);
     }
 
     switch(node->expression.first)
     {
+    case Lexer::Lexeme::Word:
+    {
+        if(node->children[0]->expression.first == Lexer::Lexeme::BraceOpen)
+        {
+            auto it = functions.find(node->expression.second);
+            if(it == functions.end()) return node->expression;
+
+            std::vector<Lexer::Token> args;
+            for(auto i : node->children[0]->children)
+                if(i->expression.first != Lexer::Lexeme::None)
+                    args.push_back(GetReturn(i, vars));
+
+            it->second.SetArgs(args, variables);
+
+            Lexer::Token ret;
+            auto c = it->second.GetBody()->children;
+            for(auto i = c.begin(); i < c.end()/* && ret.first == Lexer::Lexeme::None*/; i++)
+                ret = GetReturn(*i, it->second.GetLocalVariables());
+
+            return ret;
+        }
+        return node->expression;
+    }
+
     case Lexer::Lexeme::Equal:
     {
-        auto it = variables.find(leftRet.second);
-        if(it != variables.end())
+        if(node->children.size() == 3)
         {
-            it->second = std::make_pair(rightRet.first, rightRet.second);
-            return it->second.GetData();
+            std::vector<std::shared_ptr<AST::Node>> args;
+            std::shared_ptr<AST::Node> body;
+        
+            for(auto i : node->children[1]->children)
+                if(i->expression.first != Lexer::Lexeme::None)
+                    args.push_back(i);
+            
+            body = node->children[2];
+
+            auto it = vars.find(node->children[0]->expression.second);
+            if(it != vars.end())
+                vars.erase(it);
+            functions[node->children[0]->expression.second] = Function(args, body);
+            return node->children[0]->expression;
+        }
+
+        auto it = vars.find(node->children[0]->expression.second);
+        if(it != vars.end())
+        {
+            *(it->second) = std::make_pair(rightRet.first, rightRet.second);
+            return it->second->GetData();
         }
         return rightRet;
     }
@@ -100,6 +149,8 @@ int main(int argc, char** argv)
     for(auto i : ast.GetRootNode()->children)
         GetReturn(i);
     
+    for(auto [name, func] : functions)
+        std::cout << name << " " << /*var.GetData().second <<*/ std::endl;
     for(auto [name, var] : variables)
-        std::cout << name << " " << var.GetData().second << std::endl;
+        std::cout << name << " " << var->GetData().second << std::endl;
 }

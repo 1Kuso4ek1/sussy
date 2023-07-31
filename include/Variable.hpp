@@ -1,13 +1,20 @@
 #pragma once
 #include "Lexer.hpp"
+#include <unordered_map>
+#include <memory>
 
 class Variable
 {
 public:
-    Variable& operator=(std::pair<Lexer::Lexeme, std::string> data);
+    Variable() {}
+    Variable(Lexer::Token data) : data(data) {}
 
-    std::pair<Lexer::Lexeme, std::string> GetData();
+    Variable& operator=(Lexer::Token data);
+
+    Lexer::Token GetData();
 
 private:
-    std::pair<Lexer::Lexeme, std::string> data = { Lexer::Lexeme::None, "" };
+    Lexer::Token data = { Lexer::Lexeme::None, "" };
 };
+
+static std::unordered_map<std::string, std::shared_ptr<Variable>> variables;

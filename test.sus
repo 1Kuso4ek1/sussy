@@ -1,6 +1,15 @@
-a = 4.0 / 2.0 * 6.0 - 3.0 + 1.0;
-b = "hello" + " " + "world" + " ";
-c = 10.0;
-d = "sus";
-e = a + c;
-f = b + d;
+a = 0;
+b = 0;
+
+amogus = (sus)
+{
+    a = sus;
+}
+
+sussy = (sus)
+{
+    b = sus;
+}
+
+amogus(10);
+sussy(50);

@@ -20,6 +20,7 @@ public:
         CurlyBraceOpen,
         CurlyBraceClose,
         Dot,
+        Comma,
         Semicolon,
         Quote,
         Equal,
