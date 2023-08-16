@@ -123,6 +123,9 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, std::unordered_map<std::
 
             it->second.SetArgs(args, variables);
 
+            if(!it->second.GetBody())
+                return it->second.Execute();
+
             Lexer::Token ret;
             auto c = it->second.GetBody()->children;
             for(auto i = c.begin(); i < c.end() - 1/* && ret.first == Lexer::Lexeme::None*/; i++)
@@ -194,13 +197,18 @@ int main(int argc, char** argv)
 
     AST ast(res);
 
-    PrintAST(ast.GetRootNode());
+    //PrintAST(ast.GetRootNode());
+
+    functions["print"] = Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                                  [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second; return { Lexer::Lexeme::None, "" }; });
+    functions["println"] = Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                                    [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second << std::endl; return { Lexer::Lexeme::None, "" }; });
 
     for(auto i : ast.GetRootNode()->children)
         GetReturn(i);
     
-    for(auto [name, func] : functions)
-        std::cout << name << " " << /*var.GetData().second <<*/ std::endl;
+    /*for(auto [name, func] : functions)
+        std::cout << name << " " << std::endl;
     for(auto [name, var] : variables)
-        std::cout << name << " " << var->GetData().second << std::endl;
+        std::cout << name << " " << var->GetData().second << std::endl;*/
 }

@@ -1,11 +1,10 @@
-b = 20;
-
 add = (var, var1)
 {
     var + var1;
 }
 
 a = 10;
+b = 20;
 
 if(a < b)
 {
@@ -17,6 +16,9 @@ while(b < a)
     b = add(b, 5);
     if(b == 60)
     {
+        println("Now b is 60!");
         b = 200;
     }
 }
+
+print("b = "); println(b);

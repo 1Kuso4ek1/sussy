@@ -1,6 +1,6 @@
 #include <Function.hpp>
 
-void Function::SetArgs(std::vector<Lexer::Token> args, std::unordered_map<std::string, std::shared_ptr<Variable>>& vars)
+void Function::SetArgs(std::vector<Lexer::Token> args, VarMap& vars)
 {
     localVariables.clear();
 
@@ -10,7 +10,7 @@ void Function::SetArgs(std::vector<Lexer::Token> args, std::unordered_map<std::s
         localVariables[name] = var;
 }
 
-std::unordered_map<std::string, std::shared_ptr<Variable>>& Function::GetLocalVariables()
+VarMap& Function::GetLocalVariables()
 {
     return localVariables;
 }
@@ -18,4 +18,9 @@ std::unordered_map<std::string, std::shared_ptr<Variable>>& Function::GetLocalVa
 std::shared_ptr<AST::Node> Function::GetBody()
 {
     return body;
+}
+
+Lexer::Token Function::Execute()
+{
+    return cppbody(localVariables);
 }
