@@ -26,6 +26,18 @@ Lexer::Lexer(const std::string& input)
                 tokens.back().second = "==";
                 return;
             }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::IsLess)
+            {
+                tokens.back().first = Lexeme::IsLessOrEqual;
+                tokens.back().second = "<=";
+                return;
+            }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::IsGreater)
+            {
+                tokens.back().first = Lexeme::IsGreaterOrEqual;
+                tokens.back().second = ">=";
+                return;
+            }
             res = { l, std::string(1, i) };
             addAndClear();
         }
@@ -51,6 +63,8 @@ Lexer::Lexer(const std::string& input)
         case '-': singleChar(Lexeme::Minus, i); break;
         case '*': singleChar(Lexeme::Multiply, i); break;
         case '/': singleChar(Lexeme::Divide, i); break;
+        case '<': singleChar(Lexeme::IsLess, i); break;
+        case '>': singleChar(Lexeme::IsGreater, i); break;
         case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case 'A'...'z': 

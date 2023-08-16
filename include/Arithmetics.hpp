@@ -1,6 +1,66 @@
 #pragma once
 #include "Lexer.hpp"
 
+static Lexer::Token IsLess(Lexer::Token left, Lexer::Token right)
+{
+    switch (left.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Bool, stoi(left.second) < stoi(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Bool, stof(left.second) < stof(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::String:
+        return { Lexer::Lexeme::Bool, left.second.size() < right.second.size() ? "true" : "false" };
+    }
+
+    return { Lexer::Lexeme::Bool, "false" };
+}
+
+static Lexer::Token IsGreater(Lexer::Token left, Lexer::Token right)
+{
+    switch (left.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Bool, stoi(left.second) > stoi(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Bool, stof(left.second) > stof(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::String:
+        return { Lexer::Lexeme::Bool, left.second.size() > right.second.size() ? "true" : "false" };
+    }
+
+    return { Lexer::Lexeme::Bool, "false" };
+}
+
+static Lexer::Token IsLessOrEqual(Lexer::Token left, Lexer::Token right)
+{
+    switch (left.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Bool, stoi(left.second) <= stoi(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Bool, stof(left.second) <= stof(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::String:
+        return { Lexer::Lexeme::Bool, left.second.size() <= right.second.size() ? "true" : "false" };
+    }
+
+    return { Lexer::Lexeme::Bool, "false" };
+}
+
+static Lexer::Token IsGreaterOrEqual(Lexer::Token left, Lexer::Token right)
+{
+    switch (left.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Bool, stoi(left.second) >= stoi(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Bool, stof(left.second) >= stof(right.second) ? "true" : "false" };
+    case Lexer::Lexeme::String:
+        return { Lexer::Lexeme::Bool, left.second.size() >= right.second.size() ? "true" : "false" };
+    }
+
+    return { Lexer::Lexeme::Bool, "false" };
+}
+
 static Lexer::Token IsEqual(Lexer::Token left, Lexer::Token right)
 {
     return { Lexer::Lexeme::Bool, left.second == right.second ? "true" : "false" };

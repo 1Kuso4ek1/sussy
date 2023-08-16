@@ -29,7 +29,11 @@ public:
         Minus,
         Multiply,
         Divide,
-        IsEqual
+        IsEqual,
+        IsLess,
+        IsGreater,
+        IsLessOrEqual,
+        IsGreaterOrEqual
     };
     
     typedef std::pair<Lexer::Lexeme, std::string> Token;

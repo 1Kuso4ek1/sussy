@@ -58,6 +58,10 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             currentNode = prevNode->children.back();
             break;
 
+        case Lexer::Lexeme::IsLess:
+        case Lexer::Lexeme::IsGreater:
+        case Lexer::Lexeme::IsLessOrEqual:
+        case Lexer::Lexeme::IsGreaterOrEqual:
         case Lexer::Lexeme::IsEqual:
         case Lexer::Lexeme::Equal:
         case Lexer::Lexeme::Plus:

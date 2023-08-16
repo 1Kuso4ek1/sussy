@@ -21,6 +21,10 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::ReservedWord: std::cout << "Expression: { Lexeme::ReservedWord, "; break;
     case Lexer::Lexeme::Word: std::cout << "Expression: { Lexeme::Word, "; break;
     case Lexer::Lexeme::IsEqual: std::cout << "Expression: { Lexeme::IsEqual, "; break;
+    case Lexer::Lexeme::IsLess: std::cout << "Expression: { Lexeme::IsLess, "; break;
+    case Lexer::Lexeme::IsGreater: std::cout << "Expression: { Lexeme::IsGreater, "; break;
+    case Lexer::Lexeme::IsLessOrEqual: std::cout << "Expression: { Lexeme::IsLessOrEqual, "; break;
+    case Lexer::Lexeme::IsGreaterOrEqual: std::cout << "Expression: { Lexeme::IsGreaterOrEqual, "; break;
     case Lexer::Lexeme::Equal: std::cout << "Expression: { Lexeme::Equal, "; break;
     case Lexer::Lexeme::Plus: std::cout << "Expression: { Lexeme::Plus, "; break;
     case Lexer::Lexeme::Minus: std::cout << "Expression: { Lexeme::Minus, "; break;
@@ -86,6 +90,20 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, std::unordered_map<std::
                 break;
             }
 
+            if(node->expression.second == "while")
+            {
+                while(std::find(args.begin(), args.end(), Lexer::Token(Lexer::Lexeme::Bool, "false")) == args.end())
+                {
+                    for(auto i = c.begin(); i < c.end(); i++)
+                        GetReturn(*i, variables);
+                    args.clear();
+                    for(auto i : node->children[0]->children)
+                        if(i->expression.first != Lexer::Lexeme::None && 
+                           i->expression.first != Lexer::Lexeme::CurlyBraceOpen)
+                            args.push_back(GetReturn(i, vars));
+                }
+            }
+
             return { Lexer::Lexeme::None, "" };
         }
         return node->expression;
@@ -145,6 +163,10 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, std::unordered_map<std::
     }
 
     case Lexer::Lexeme::IsEqual: return IsEqual(leftRet, rightRet);
+    case Lexer::Lexeme::IsLess: return IsLess(leftRet, rightRet);
+    case Lexer::Lexeme::IsGreater: return IsGreater(leftRet, rightRet);
+    case Lexer::Lexeme::IsLessOrEqual: return IsLessOrEqual(leftRet, rightRet);
+    case Lexer::Lexeme::IsGreaterOrEqual: return IsGreaterOrEqual(leftRet, rightRet);
     case Lexer::Lexeme::Plus: return Add(leftRet, rightRet);
     case Lexer::Lexeme::Minus: return Subtract(leftRet, rightRet);
     case Lexer::Lexeme::Multiply: return Multiply(leftRet, rightRet);
