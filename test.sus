@@ -1,15 +1,6 @@
-a = 0;
-b = 0;
+a = 10;
 
-amogus = (sus)
+if(a == 10)
 {
-    a = sus;
+    a = 50;
 }
-
-sussy = (sus)
-{
-    b = sus;
-}
-
-amogus(10);
-sussy(50);

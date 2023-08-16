@@ -13,6 +13,7 @@ public:
         Word,
         ReservedWord,
         Int,
+        Bool,
         Float,
         String,
         BraceOpen,
@@ -27,7 +28,8 @@ public:
         Plus,
         Minus,
         Multiply,
-        Divide
+        Divide,
+        IsEqual
     };
     
     typedef std::pair<Lexer::Lexeme, std::string> Token;

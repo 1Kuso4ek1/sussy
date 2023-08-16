@@ -6,20 +6,30 @@ Lexer::Lexer(const std::string& input)
     bool openedQuote = false;
     auto addAndClear = [&]()
     {
-        if(res.first == Lexeme::Word && std::find(reservedWords.begin(), reservedWords.end(), res.second) != reservedWords.end())
-            res.first = Lexeme::ReservedWord;
+        if(res.first == Lexeme::Word)
+            if(std::find(reservedWords.begin(), reservedWords.end(), res.second) != reservedWords.end())
+                res.first = Lexeme::ReservedWord;
+            else if(res.second == "true" || res.second == "false")
+                res.first = Lexeme::Bool;
         if(res.first != Lexeme::None) tokens.push_back(res);
         res = { Lexeme::None, "" };
     };
 
-    auto singleChar = [&](Lexeme t, char i)
+    auto singleChar = [&](Lexeme l, char i)
     {
         if(!openedQuote)
         {
             addAndClear();
-            res = { t, std::string(1, i) };
-            addAndClear(); 
-        } else res.second += i;
+            if(l == Lexeme::Equal && tokens.back().first == Lexeme::Equal)
+            {
+                tokens.back().first = Lexeme::IsEqual;
+                tokens.back().second = "==";
+                return;
+            }
+            res = { l, std::string(1, i) };
+            addAndClear();
+        }
+        else res.second += i;
     };
     
     for(char i : input)

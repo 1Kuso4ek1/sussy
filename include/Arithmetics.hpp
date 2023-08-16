@@ -1,6 +1,11 @@
 #pragma once
 #include "Lexer.hpp"
 
+static Lexer::Token IsEqual(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Bool, left.second == right.second ? "true" : "false" };
+}
+
 static Lexer::Token Add(Lexer::Token left, Lexer::Token right)
 {
     switch (left.first)

@@ -16,6 +16,7 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
     {
         switch (i->first)
         {
+        case Lexer::Lexeme::ReservedWord:
         case Lexer::Lexeme::Word:
         case Lexer::Lexeme::Int:
         case Lexer::Lexeme::Float:
@@ -57,6 +58,7 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             currentNode = prevNode->children.back();
             break;
 
+        case Lexer::Lexeme::IsEqual:
         case Lexer::Lexeme::Equal:
         case Lexer::Lexeme::Plus:
         case Lexer::Lexeme::Minus:
