@@ -1,6 +1,22 @@
+b = 20;
+
+add = (var, var1)
+{
+    var + var1;
+}
+
 a = 10;
 
-while(a < 100)
+if(a < b)
 {
-    a = a + 2;
+    a = 100;
+}
+
+while(b < a)
+{
+    b = add(b, 5);
+    if(b == 60)
+    {
+        b = 200;
+    }
 }

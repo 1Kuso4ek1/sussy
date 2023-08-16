@@ -125,7 +125,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, std::unordered_map<std::
 
             Lexer::Token ret;
             auto c = it->second.GetBody()->children;
-            for(auto i = c.begin(); i < c.end()/* && ret.first == Lexer::Lexeme::None*/; i++)
+            for(auto i = c.begin(); i < c.end() - 1/* && ret.first == Lexer::Lexeme::None*/; i++)
                 ret = GetReturn(*i, it->second.GetLocalVariables());
 
             return ret;
