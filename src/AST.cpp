@@ -30,6 +30,7 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             currentNode = currentNode->children.back();
             curlyBraceNodes.push_back(currentNode);
         case Lexer::Lexeme::BraceOpen:      // not as good as might be!
+            if(i->first == Lexer::Lexeme::BraceOpen) braceOpen = true;
             if(currentNode->expression.first != Lexer::Lexeme::None)
             {
                 currentNode->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
@@ -51,7 +52,11 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             break;
 
         case Lexer::Lexeme::BraceClose:
-            currentNode = prevNode1;
+            if(i->first == Lexer::Lexeme::BraceClose)
+            {
+                braceOpen = false;
+                currentNode = prevNode;
+            }
             break;
         
         case Lexer::Lexeme::Comma:
@@ -72,21 +77,17 @@ AST::AST(const std::vector<Lexer::Token>& tokens)
             currentNode->expression = *i;
             currentNode->children.emplace_back(std::make_shared<Node>(*(i - 1)));
             currentNode->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
-            prevNode1 = prevNode;
-            prevNode = currentNode;
+            if(!braceOpen)
+            {
+                prevNode1 = prevNode;
+                prevNode = currentNode;
+            }
             currentNode = currentNode->children.back();
             break;
 
         case Lexer::Lexeme::Semicolon:
-            if(curlyBraceOpen)
-            {
-                curlyBraceNodes.back()->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
-                currentNode = curlyBraceNodes.back()->children.back();
-                break;
-            }
-
-            root->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
-            currentNode = root->children.back();
+            curlyBraceNodes.back()->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
+            currentNode = curlyBraceNodes.back()->children.back();
             break;
         
         default:

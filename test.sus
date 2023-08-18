@@ -1,24 +1,32 @@
-add = (var, var1)
+# This program shows some basic math functions #
+
+pi = 3.141592654;
+
+abs = (num)
 {
-    var + var1;
+    if(num < 0) { num = 0 - num; }
+    num;
 }
 
-a = 10;
-b = 20;
-
-if(a < b)
+radians = (deg)
 {
-    a = 100;
+    deg * pi / 180.0;
 }
 
-while(b < a)
+# Not working with num < 0 yet #
+factorial = (num)
 {
-    b = add(b, 5);
-    if(b == 60)
+    ret = num;
+    if(num == 0) { ret = 1; }
+
+    while(num > 1)
     {
-        println("Now b is 60!");
-        b = 200;
+        num = num - 1;
+        ret = ret * num;
     }
+    ret;
 }
 
-print("b = "); println(b);
+println(radians(5.0));
+println(abs(6 - 12));
+println(factorial(10));

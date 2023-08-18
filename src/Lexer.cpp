@@ -4,8 +4,14 @@ Lexer::Lexer(const std::string& input)
 {
     Lexer::Token res(Lexeme::None, "");
     bool openedQuote = false;
+    bool openedComment = false;
     auto addAndClear = [&]()
     {
+        if(openedComment)
+        {
+            res = { Lexeme::None, "" };
+            return;
+        }
         if(res.first == Lexeme::Word)
             if(std::find(reservedWords.begin(), reservedWords.end(), res.second) != reservedWords.end())
                 res.first = Lexeme::ReservedWord;
@@ -66,6 +72,8 @@ Lexer::Lexer(const std::string& input)
         case '<': singleChar(Lexeme::IsLess, i); break;
         case '>': singleChar(Lexeme::IsGreater, i); break;
         case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
+
+        case '#': openedComment = !openedComment; break;
 
         case 'A'...'z': 
             if(res.first == Lexeme::Word || openedQuote) res.second += i;
