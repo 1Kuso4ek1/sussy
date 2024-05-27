@@ -29,4 +29,6 @@ factorial = (num)
 
 println(radians(5.0));
 println(abs(6 - 12));
-println(factorial(10));
+println(factorial(5));
+
+println(5 - 5 - 5 - 5 - 5);

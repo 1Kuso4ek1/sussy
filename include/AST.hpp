@@ -15,7 +15,7 @@ public:
         std::vector<std::shared_ptr<Node>> children;
     };
 
-    AST(const std::vector<Lexer::Token>& tokens);
+    AST(std::vector<Lexer::Token>& tokens);
 
     std::shared_ptr<Node> GetRootNode();
 
