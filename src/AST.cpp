@@ -2,6 +2,7 @@
 
 AST::AST(std::vector<Lexer::Token>& tokens)
 {
+    /*
     root = std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, ""));
     root->children.emplace_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
     std::shared_ptr<Node> currentNode = root->children[0];
@@ -112,9 +113,98 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             break;
         }
     }
+    */
+    
+    std::stack<std::shared_ptr<Node>> values, operators;
+
+    auto addUnaryChild = [&]()
+    {
+        auto operand = values.top(); values.pop();
+        auto node = operators.top(); operators.pop();
+
+        node->children.push_back(operand);
+
+        values.push(node);
+    };
+    
+    auto addChild = [&]()
+    {
+        auto right = values.top(); values.pop();
+        auto left = values.top(); values.pop();
+        auto node = operators.top(); operators.pop();
+
+        node->children.push_back(left);
+        node->children.push_back(right);
+
+        values.push(node);
+    };
+
+    for(auto i = tokens.begin(); i < tokens.end(); i++)
+    {
+        switch(i->first)
+        {
+        case Lexer::Lexeme::Int:
+        case Lexer::Lexeme::Float:
+            values.push(std::make_shared<Node>(*i));
+            break;
+
+        case Lexer::Lexeme::BraceOpen:
+            operators.push(std::make_shared<Node>(*i));
+            break;
+        case Lexer::Lexeme::BraceClose:
+            while(!operators.empty() && operators.top()->expression.first != Lexer::Lexeme::BraceOpen)
+                addChild();
+            operators.pop();
+            break;
+
+        case Lexer::Lexeme::Minus:
+        case Lexer::Lexeme::Plus:
+        case Lexer::Lexeme::Comma:
+        case Lexer::Lexeme::IsLess:
+        case Lexer::Lexeme::IsGreater:
+        case Lexer::Lexeme::IsLessOrEqual:
+        case Lexer::Lexeme::IsGreaterOrEqual:
+        case Lexer::Lexeme::IsEqual:
+        case Lexer::Lexeme::Equal:
+        case Lexer::Lexeme::Multiply:
+        case Lexer::Lexeme::Divide:
+            while(!operators.empty() && GetOperatorPriority(operators.top()->expression.first) >= GetOperatorPriority(i->first))
+                addChild();
+            operators.push(std::make_shared<Node>(*i));
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    while(!operators.empty())
+        addChild();
+
+    root = values.top();
 }
 
 std::shared_ptr<AST::Node> AST::GetRootNode()
 {
     return root;
+}
+
+int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
+{
+    switch(lexeme)
+    {
+    case Lexer::Lexeme::Comma: return 17;
+    case Lexer::Lexeme::IsLess: return 2;
+    case Lexer::Lexeme::IsGreater: return 2;
+    case Lexer::Lexeme::IsLessOrEqual: return 2;
+    case Lexer::Lexeme::IsGreaterOrEqual: return 2;
+    case Lexer::Lexeme::IsEqual: return 1;
+    case Lexer::Lexeme::Equal: return 1;
+    case Lexer::Lexeme::Plus: return 3;
+    case Lexer::Lexeme::Minus: return 3;
+    case Lexer::Lexeme::Multiply: return 4;
+    case Lexer::Lexeme::Divide: return 4;
+    
+    default: return 0;
+    }
 }

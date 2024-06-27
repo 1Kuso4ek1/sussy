@@ -12,6 +12,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     switch (node->expression.first)
     {
     case Lexer::Lexeme::None: std::cout << "Expression: { Lexeme::None, "; break;
+    case Lexer::Lexeme::Comma: std::cout << "Expression: { Lexeme::Comma, "; break;
     case Lexer::Lexeme::BraceOpen: std::cout << "Expression: { Lexeme::BraceOpen, "; break;
     case Lexer::Lexeme::BraceClose: std::cout << "Expression: { Lexeme::BraceClose, "; break;
     case Lexer::Lexeme::CurlyBraceOpen: std::cout << "Expression: { Lexeme::CurlyBraceOpen, "; break;
@@ -31,6 +32,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::Int: std::cout << "Expression: { Lexeme::Int, "; break;
     case Lexer::Lexeme::Float: std::cout << "Expression: { Lexeme::Float, "; break;
     case Lexer::Lexeme::String: std::cout << "Expression: { Lexeme::String, "; break;
+
     default: break;
     }
 
@@ -60,8 +62,8 @@ int main(int argc, char** argv)
 
     PrintAST(ast.GetRootNode());
 
-    for(auto i : ast.GetRootNode()->children)
-        GetReturn(i, variables);
+    /*for(auto i : ast.GetRootNode()->children)
+        GetReturn(i, variables);*/
     
     /*for(auto [name, func] : functions)
         std::cout << name << " " << std::endl;

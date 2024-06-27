@@ -36,7 +36,7 @@ public:
         IsGreaterOrEqual
     };
     
-    typedef std::pair<Lexer::Lexeme, std::string> Token;
+    using Token = std::pair<Lexer::Lexeme, std::string>;
 
     Lexer(const std::string& input);
 

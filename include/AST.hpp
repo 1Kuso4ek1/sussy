@@ -2,6 +2,7 @@
 #include "Lexer.hpp"
 #include "Arithmetics.hpp"
 #include <memory>
+#include <stack>
 
 class AST
 {
@@ -20,5 +21,7 @@ public:
     std::shared_ptr<Node> GetRootNode();
 
 private:
+    int GetOperatorPriority(Lexer::Lexeme lexeme);
+
     std::shared_ptr<Node> root;
 };
