@@ -16,6 +16,8 @@ public:
         std::vector<std::shared_ptr<Node>> children;
     };
 
+    using NodeList = std::vector<std::shared_ptr<Node>>;
+
     AST(std::vector<Lexer::Token>& tokens);
 
     std::shared_ptr<Node> GetRootNode();

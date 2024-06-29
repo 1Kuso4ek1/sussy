@@ -17,4 +17,4 @@ private:
     Lexer::Token data = { Lexer::Lexeme::None, "" };
 };
 
-typedef std::unordered_map<std::string, std::shared_ptr<Variable>> VarMap;
+using VarMap = std::unordered_map<std::string, std::shared_ptr<Variable>>;

@@ -1,5 +1,15 @@
 #include <Exec.hpp>
 
+AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeList found)
+{
+    for(auto& i : node->children)
+        if(i->expression.first != Lexer::Lexeme::Comma)
+            found.push_back(i);
+        else found = GetCommaSeparatedNodes(i, found);
+
+    return found;
+}
+
 Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
 {
     if(!execNext)
@@ -23,7 +33,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
     Lexer::Token leftRet;
     Lexer::Token rightRet;
 
-    if(node->expression.first != Lexer::Lexeme::BraceOpen && node->children.size() == 2)
+    if(node->children.size() == 2)
     {
         leftRet = GetReturn(node->children[0], vars);
         rightRet = GetReturn(node->children[1], vars);
@@ -72,7 +82,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
 
     case Lexer::Lexeme::Word:
     {
-        if(node->children[0]->expression.first == Lexer::Lexeme::BraceOpen)
+        if(node->children.empty())
         {
             auto it = functions.find(node->expression.second);
             if(it == functions.end()) return node->expression;
@@ -99,23 +109,21 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
 
     case Lexer::Lexeme::Equal:
     {
-        if(node->children[1]->children.size() > 0)
-            if(node->children[1]->children.back()->expression.first == Lexer::Lexeme::CurlyBraceOpen)
+        if(node->children.size() > 2)
+            if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen)
             {
-                std::vector<std::shared_ptr<AST::Node>> args;
+                AST::NodeList args;
                 std::shared_ptr<AST::Node> body;
             
-                for(auto i : node->children[1]->children)
-                    if(i->expression.first != Lexer::Lexeme::None &&
-                       i->expression.first != Lexer::Lexeme::CurlyBraceOpen)
-                        args.push_back(i);
+                args = GetCommaSeparatedNodes(node->children[1]);
                 
-                body = node->children[1]->children.back();
+                body = node->children[2];
 
                 auto it = vars.find(node->children[0]->expression.second);
                 if(it != vars.end())
                     vars.erase(it);
                 functions[node->children[0]->expression.second] = Function(args, body);
+
                 return node->children[0]->expression;
             }
 
