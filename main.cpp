@@ -2,8 +2,6 @@
 #include <iostream>
 #include <Exec.hpp>
 
-VarMap variables;
-
 void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
 {
     if(depth != 0) std::cout << "|";// << std::endl << "|";
@@ -65,8 +63,8 @@ int main(int argc, char** argv)
     for(auto i : ast.GetRootNode()->children)
         GetReturn(i, variables);
     
-    for(auto [name, func] : functions)
+    /*for(auto [name, func] : functions)
         std::cout << name << " " << std::endl;
     for(auto [name, var] : variables)
-        std::cout << name << " " << var->GetData().second << std::endl;
+        std::cout << name << " " << var->GetData().second << std::endl;*/
 }

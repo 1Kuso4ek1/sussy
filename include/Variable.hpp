@@ -18,3 +18,5 @@ private:
 };
 
 using VarMap = std::unordered_map<std::string, std::shared_ptr<Variable>>;
+
+static VarMap variables;

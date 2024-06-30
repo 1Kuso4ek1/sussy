@@ -18,6 +18,12 @@ AST::AST(std::vector<Lexer::Token>& tokens)
     
     auto addChild = [&]()
     {
+        if(values.size() < 2)
+        {
+            addUnaryChild();
+            return;
+        }
+        
         auto right = values.top(); values.pop();
         auto left = values.top(); values.pop();
         auto node = operators.top(); operators.pop();
@@ -28,26 +34,31 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         values.push(node);
     };
 
+    auto collapseStack = [&]()
+    {
+        while(values.size() > 1)
+        {
+            auto node = values.top(); values.pop();
+            values.top()->children.push_back(node);
+        }
+    };
+
     for(auto i = tokens.begin(); i < tokens.end(); i++)
     {
         switch(i->first)
         {
         case Lexer::Lexeme::ReservedWord:
         case Lexer::Lexeme::Word:
-            if((i + 1)->first == Lexer::Lexeme::BraceOpen)
-            {
-                values.push(std::make_shared<Node>(*i));
-                values.top()->children.push_back(std::make_shared<Node>(*(++i)));
-                operators.push(values.top()->children.back());
-                break;
-            }
         case Lexer::Lexeme::String:
         case Lexer::Lexeme::Int:
         case Lexer::Lexeme::Float:
             values.push(std::make_shared<Node>(*i)); break;
 
         case Lexer::Lexeme::BraceOpen:
-            operators.push(std::make_shared<Node>(*i)); break;
+            if((i + 1)->first == Lexer::Lexeme::BraceClose)
+                values.push(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
+            operators.push(std::make_shared<Node>(*i));
+            break;
             
         case Lexer::Lexeme::BraceClose:
             while(!operators.empty() && operators.top()->expression.first != Lexer::Lexeme::BraceOpen)
@@ -78,6 +89,8 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::Semicolon:
             while(!operators.empty())
                 addChild();
+
+            collapseStack();
             
             if(curlyBraces.size() == 0)
                 root->children.push_back(values.top());
@@ -89,6 +102,9 @@ AST::AST(std::vector<Lexer::Token>& tokens)
                 curlyBraces.push(std::make_shared<Node>(*i));
                 values.top()->children.push_back(curlyBraces.top());
             }
+
+            values.pop();
+
             break;
 
         default:

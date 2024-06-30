@@ -8,9 +8,9 @@ class Function
 {
 public:
     Function() {}
-    Function(std::vector<std::shared_ptr<AST::Node>> args, std::shared_ptr<AST::Node> body)
+    Function(AST::NodeList args, std::shared_ptr<AST::Node> body)
             : args(args), body(body) {}
-    Function(std::vector<std::shared_ptr<AST::Node>> args, std::function<Lexer::Token(VarMap)> cppbody)
+    Function(AST::NodeList args, std::function<Lexer::Token(VarMap)> cppbody)
             : args(args), cppbody(cppbody) {}
 
     void SetArgs(std::vector<Lexer::Token> args, VarMap& vars);

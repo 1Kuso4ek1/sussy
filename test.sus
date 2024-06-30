@@ -1,6 +1,6 @@
-a = (null)
+writeString = (str)
 {
-    k = 15;
+    println(str);
 }
 
-m = ((1 + (2 + 3)) * 2); # 12 #
+writeString("Hello");

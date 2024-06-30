@@ -2,8 +2,10 @@
 
 AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeList found)
 {
+    if(found.empty() && node->expression.first != Lexer::Lexeme::Comma && node->expression.first != Lexer::Lexeme::None)
+        found.push_back(node);
     for(auto& i : node->children)
-        if(i->expression.first != Lexer::Lexeme::Comma)
+        if(i->expression.first != Lexer::Lexeme::Comma && i->expression.first != Lexer::Lexeme::None)
             found.push_back(i);
         else found = GetCommaSeparatedNodes(i, found);
 
@@ -80,17 +82,20 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
         return node->expression;
     }
 
+    case Lexer::Lexeme::Int:
+    case Lexer::Lexeme::Float:
+    case Lexer::Lexeme::String:
     case Lexer::Lexeme::Word:
     {
-        if(node->children.empty())
+        if(!node->children.empty())
         {
             auto it = functions.find(node->expression.second);
             if(it == functions.end()) return node->expression;
 
+            auto nodes = GetCommaSeparatedNodes(node);
             std::vector<Lexer::Token> args;
-            for(auto i : node->children[0]->children)
-                if(i->expression.first != Lexer::Lexeme::None)
-                    args.push_back(GetReturn(i, vars));
+            for(auto& i : nodes)
+                args.push_back(GetReturn(i, vars));
 
             it->second.SetArgs(args, vars);
 
@@ -99,7 +104,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
 
             Lexer::Token ret;
             auto c = it->second.GetBody()->children;
-            for(auto i = c.begin(); i < c.end() - 1/* && ret.first == Lexer::Lexeme::None*/; i++)
+            for(auto i = c.begin(); i < c.end(); i++)
                 ret = GetReturn(*i, it->second.GetLocalVariables());
 
             return ret;
