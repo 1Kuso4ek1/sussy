@@ -23,6 +23,13 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             addUnaryChild();
             return;
         }
+
+        if(values.size() % 2 == 1 && GetOperatorPriority(operators.top()->expression.first) == 2) //operators.top()->expression.first != Lexer::Lexeme::Plus && operators.top()->expression.first != Lexer::Lexeme::Comma
+        {
+            auto none = values.top(); values.pop();
+            values.top()->children.push_back(none);
+            return;
+        }
         
         auto right = values.top(); values.pop();
         auto left = values.top(); values.pop();
@@ -123,12 +130,12 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     switch(lexeme)
     {
     case Lexer::Lexeme::Comma: return 17;
-    case Lexer::Lexeme::IsLess: return 2;
-    case Lexer::Lexeme::IsGreater: return 2;
-    case Lexer::Lexeme::IsLessOrEqual: return 2;
-    case Lexer::Lexeme::IsGreaterOrEqual: return 2;
+    case Lexer::Lexeme::IsLess: return 1;
+    case Lexer::Lexeme::IsGreater: return 1;
+    case Lexer::Lexeme::IsLessOrEqual: return 1;
+    case Lexer::Lexeme::IsGreaterOrEqual: return 1;
     case Lexer::Lexeme::IsEqual: return 1;
-    case Lexer::Lexeme::Equal: return 5;
+    case Lexer::Lexeme::Equal: return 2;
     case Lexer::Lexeme::Plus: return 3;
     case Lexer::Lexeme::Minus: return 3;
     case Lexer::Lexeme::Multiply: return 4;

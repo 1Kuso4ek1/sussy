@@ -32,5 +32,10 @@ static std::unordered_map<std::string, Function> functions =
     { "print", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
                         [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second; return { Lexer::Lexeme::None, "" }; }) },
     { "println", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second << std::endl; return { Lexer::Lexeme::None, "" }; }) }
+                          [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second << std::endl; return { Lexer::Lexeme::None, "" }; }) },
+    { "input", Function({ }, [](VarMap v) -> Lexer::Token { std::string ret; std::cin >> ret; return { Lexer::Lexeme::String, ret }; }) },
+    { "int", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Int, v["value"]->GetData().second }; }) },
+    { "float", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) }
 };

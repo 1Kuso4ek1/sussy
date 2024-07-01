@@ -1,6 +1,4 @@
-writeString = (str)
+if(10 > 5)
 {
-    println(str);
+    println("true");
 }
-
-writeString("Hello");
