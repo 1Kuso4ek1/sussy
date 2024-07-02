@@ -1,5 +1,7 @@
 # JESUS CHRIST, A CALCULATOR!!! #
 
+import "../math.sus"
+
 inputNumber = ()
 {
     print("Enter a number: ");
@@ -8,34 +10,44 @@ inputNumber = ()
 
 inputOperator = ()
 {
-    print("Enter an operator (+-*/): ");
+    print("Enter an operator (+-*/!): ");
     input();
 }
 
 a = inputNumber();
 op = inputOperator();
-b = inputNumber();
 
-print(a); print(op); print(b);
-print("=");
-
-if(op == "+")
+if(op == "!")
 {
-    println(a + b);
-}
-elseif(op == "-")
-{
-    println(a - b);
-}
-elseif(op == "*")
-{
-    println(a * b);
-}
-elseif(op == "/")
-{
-    println(a / b);
+    print(a); print(op);
+    print("=");
+    println(fact(a));
 }
 else
 {
-    println("Error: unknown operation.");
+    b = inputNumber();
+
+    print(a); print(op); print(b);
+    print("=");
+
+    if(op == "+")
+    {
+        println(a + b);
+    }
+    elseif(op == "-")
+    {
+        println(a - b);
+    }
+    elseif(op == "*")
+    {
+        println(a * b);
+    }
+    elseif(op == "/")
+    {
+        println(a / b);
+    }
+    else
+    {
+        println("Error: unknown operation.");
+    }
 }

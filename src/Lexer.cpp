@@ -1,11 +1,41 @@
 #include <Lexer.hpp>
 
-Lexer::Lexer(const std::string& input)
+Lexer::Lexer(const std::string& inputFilename)
+{
+    std::ifstream file(inputFilename);
+	if(!file.is_open())
+		return;
+
+	std::string code;
+	std::copy(std::istreambuf_iterator<char>(file),
+			  std::istreambuf_iterator<char>(),
+			  std::back_inserter(code));
+
+    Tokenize(code);
+}
+
+std::vector<Lexer::Token> Lexer::Result()
+{
+    std::vector<Lexer::Token> joined;
+
+    for(auto& i : imported)
+    {
+        auto res = i.Result();
+        joined.insert(joined.end(), res.begin(), res.end());
+    }
+
+    joined.insert(joined.end(), tokens.begin(), tokens.end());
+
+    return joined;
+}
+
+void Lexer::Tokenize(const std::string& input)
 {
     Lexer::Token res(Lexeme::None, "");
     
     bool openedQuote = false;
     bool openedComment = false;
+    bool expectImportFilename = false;
 
     auto addAndClear = [&]()
     {
@@ -19,6 +49,13 @@ Lexer::Lexer(const std::string& input)
                 res.first = Lexeme::ReservedWord;
             else if(res.second == "true" || res.second == "false")
                 res.first = Lexeme::Bool;
+            else if(res.second == "import")
+            {
+                expectImportFilename = true;
+                res = { Lexeme::None, "" };        
+                return;
+            }
+
         if(res.first != Lexeme::None) tokens.push_back(res);
         res = { Lexeme::None, "" };
     };
@@ -100,6 +137,13 @@ Lexer::Lexer(const std::string& input)
         case '\'':
             openedQuote = !openedQuote;
             res.first = Lexeme::String;
+
+            if(!openedQuote && expectImportFilename)
+            {
+                expectImportFilename = false;
+                Import(res.second);
+                res = { Lexeme::None, "" };
+            }
             break;
 
         case '{': singleChar(Lexeme::CurlyBraceOpen, i); break;
@@ -145,7 +189,7 @@ Lexer::Lexer(const std::string& input)
     addAndClear();
 }
 
-std::vector<Lexer::Token> Lexer::Result()
+void Lexer::Import(const std::string& inputFilename)
 {
-    return tokens;
+    imported.push_back(inputFilename);
 }

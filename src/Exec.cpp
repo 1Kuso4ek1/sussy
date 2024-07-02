@@ -92,8 +92,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                     for(auto i : node->children[1]->children)
                         ret = GetReturn(i, vars);
                     args.clear();
-                    for(auto i : node->children)
-                        args.push_back(GetReturn(i, vars));
+                    args.push_back(GetReturn(node->children[0], vars));
                 }
             }
 

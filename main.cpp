@@ -1,5 +1,5 @@
-#include <fstream>
 #include <iostream>
+
 #include <Exec.hpp>
 
 void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
@@ -50,16 +50,7 @@ int main(int argc, char** argv)
 {
     if(argc == 1) return 1;
 
-    std::ifstream file(argv[1]);
-	if(!file.is_open())
-		return 1;
-
-	std::string code;
-	std::copy(std::istreambuf_iterator<char>(file),
-			  std::istreambuf_iterator<char>(),
-			  std::back_inserter(code));
-
-	Lexer lexer(code);
+	Lexer lexer(argv[1]);
 	auto res = lexer.Result();
 
     AST ast(res);
