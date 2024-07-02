@@ -2,7 +2,7 @@
 
 AST::AST(std::vector<Lexer::Token>& tokens)
 {
-    root = std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, ""));
+    root = std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "root"));
 
     std::stack<std::shared_ptr<Node>> values, operators, curlyBraces;
 
@@ -24,7 +24,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             return;
         }
 
-        if(values.size() % 2 == 1 && GetOperatorPriority(operators.top()->expression.first) == 2) //operators.top()->expression.first != Lexer::Lexeme::Plus && operators.top()->expression.first != Lexer::Lexeme::Comma
+        if(values.size() % 2 == 1 && GetOperatorPriority(operators.top()->expression.first) == 2)
         {
             auto none = values.top(); values.pop();
             values.top()->children.push_back(none);
@@ -63,7 +63,12 @@ AST::AST(std::vector<Lexer::Token>& tokens)
 
         case Lexer::Lexeme::BraceOpen:
             if((i + 1)->first == Lexer::Lexeme::BraceClose)
-                values.push(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
+            {
+                if(operators.size() > 1)
+                    values.top()->children.push_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
+                else
+                    values.push(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
+            }
             operators.push(std::make_shared<Node>(*i));
             break;
             
@@ -75,12 +80,18 @@ AST::AST(std::vector<Lexer::Token>& tokens)
 
         case Lexer::Lexeme::Minus:
         case Lexer::Lexeme::Plus:
+        case Lexer::Lexeme::AddAssign:
+        case Lexer::Lexeme::SubtractAssign:
+        case Lexer::Lexeme::MultiplyAssign:
+        case Lexer::Lexeme::DivideAssign:
         case Lexer::Lexeme::Comma:
         case Lexer::Lexeme::IsLess:
         case Lexer::Lexeme::IsGreater:
         case Lexer::Lexeme::IsLessOrEqual:
         case Lexer::Lexeme::IsGreaterOrEqual:
         case Lexer::Lexeme::IsEqual:
+        case Lexer::Lexeme::And:
+        case Lexer::Lexeme::Or:
         case Lexer::Lexeme::Equal:
         case Lexer::Lexeme::Multiply:
         case Lexer::Lexeme::Divide:
@@ -130,16 +141,22 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     switch(lexeme)
     {
     case Lexer::Lexeme::Comma: return 17;
-    case Lexer::Lexeme::IsLess: return 1;
-    case Lexer::Lexeme::IsGreater: return 1;
-    case Lexer::Lexeme::IsLessOrEqual: return 1;
-    case Lexer::Lexeme::IsGreaterOrEqual: return 1;
-    case Lexer::Lexeme::IsEqual: return 1;
+    case Lexer::Lexeme::IsLess: return 3;
+    case Lexer::Lexeme::IsGreater: return 3;
+    case Lexer::Lexeme::IsLessOrEqual: return 3;
+    case Lexer::Lexeme::IsGreaterOrEqual: return 3;
+    case Lexer::Lexeme::IsEqual: return 3;
+    case Lexer::Lexeme::And: return 1;
+    case Lexer::Lexeme::Or: return 1;
     case Lexer::Lexeme::Equal: return 2;
     case Lexer::Lexeme::Plus: return 3;
     case Lexer::Lexeme::Minus: return 3;
     case Lexer::Lexeme::Multiply: return 4;
     case Lexer::Lexeme::Divide: return 4;
+    case Lexer::Lexeme::AddAssign: return 2;
+    case Lexer::Lexeme::SubtractAssign: return 2;
+    case Lexer::Lexeme::MultiplyAssign: return 2;
+    case Lexer::Lexeme::DivideAssign: return 2;
     
     default: return 0;
     }

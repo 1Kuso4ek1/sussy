@@ -1,4 +1,41 @@
-if(10 > 5)
+# JESUS CHRIST, A CALCULATOR!!! #
+
+inputNumber = ()
 {
-    println("true");
+    print("Enter a number: ");
+    int(input());
+}
+
+inputOperator = ()
+{
+    print("Enter an operator (+-*/): ");
+    input();
+}
+
+a = inputNumber();
+op = inputOperator();
+b = inputNumber();
+
+print(a); print(op); print(b);
+print("=");
+
+if(op == "+")
+{
+    println(a + b);
+}
+elseif(op == "-")
+{
+    println(a - b);
+}
+elseif(op == "*")
+{
+    println(a * b);
+}
+elseif(op == "/")
+{
+    println(a / b);
+}
+else
+{
+    println("Error: unknown operation.");
 }

@@ -3,8 +3,10 @@
 Lexer::Lexer(const std::string& input)
 {
     Lexer::Token res(Lexeme::None, "");
+    
     bool openedQuote = false;
     bool openedComment = false;
+
     auto addAndClear = [&]()
     {
         if(openedComment)
@@ -44,6 +46,46 @@ Lexer::Lexer(const std::string& input)
                 tokens.back().second = ">=";
                 return;
             }
+            else if(l == Lexeme::Multiply && tokens.back().first == Lexeme::Multiply)
+            {
+                tokens.back().first = Lexeme::Pow;
+                tokens.back().second = "**";
+                return;
+            }
+            else if(l == Lexeme::And && tokens.back().first == Lexeme::And) // kinda useless for now
+            {
+                tokens.back().second = "&&";
+                return;
+            }
+            else if(l == Lexeme::Or && tokens.back().first == Lexeme::Or)
+            {
+                tokens.back().second = "||";
+                return;
+            }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::Plus)
+            {
+                tokens.back().first = Lexeme::AddAssign;
+                tokens.back().second = "+=";
+                return;
+            }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::Minus)
+            {
+                tokens.back().first = Lexeme::SubtractAssign;
+                tokens.back().second = "-=";
+                return;
+            }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::Multiply)
+            {
+                tokens.back().first = Lexeme::MultiplyAssign;
+                tokens.back().second = "*=";
+                return;
+            }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::Divide)
+            {
+                tokens.back().first = Lexeme::DivideAssign;
+                tokens.back().second = "/=";
+                return;
+            }
             res = { l, std::string(1, i) };
             addAndClear();
         }
@@ -71,6 +113,8 @@ Lexer::Lexer(const std::string& input)
         case '/': singleChar(Lexeme::Divide, i); break;
         case '<': singleChar(Lexeme::IsLess, i); break;
         case '>': singleChar(Lexeme::IsGreater, i); break;
+        case '&': singleChar(Lexeme::And, i); break;
+        case '|': singleChar(Lexeme::Or, i); break;
         case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case '#': openedComment = !openedComment; break;

@@ -66,6 +66,16 @@ static Lexer::Token IsEqual(Lexer::Token left, Lexer::Token right)
     return { Lexer::Lexeme::Bool, left.second == right.second ? "true" : "false" };
 }
 
+static Lexer::Token And(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Bool, left.second == "true" && right.second == "true" ? "true" : "false" };
+}
+
+static Lexer::Token Or(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Bool, left.second == "true" || right.second == "true" ? "true" : "false" };
+}
+
 static Lexer::Token Add(Lexer::Token left, Lexer::Token right)
 {
     switch (left.first)

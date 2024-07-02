@@ -29,11 +29,18 @@ public:
         Minus,
         Multiply,
         Divide,
+        Pow,
+        AddAssign,
+        SubtractAssign,
+        MultiplyAssign,
+        DivideAssign,
         IsEqual,
         IsLess,
         IsGreater,
         IsLessOrEqual,
-        IsGreaterOrEqual
+        IsGreaterOrEqual,
+        And,
+        Or
     };
     
     using Token = std::pair<Lexer::Lexeme, std::string>;

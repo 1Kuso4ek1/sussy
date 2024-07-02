@@ -14,12 +14,6 @@ AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeL
 
 Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
 {
-    if(!execNext)
-    {
-        execNext = true;
-        return { Lexer::Lexeme::None, "" };
-    }
-
     if(node->children.empty())
     {
         if(node->expression.first == Lexer::Lexeme::Word)
@@ -35,7 +29,22 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
     Lexer::Token leftRet;
     Lexer::Token rightRet;
 
-    if(node->children.size() == 2)
+    Lexer::Token ret = { Lexer::Lexeme::None, "" };
+
+    static bool skipElse = false;
+
+    auto assign = [&](Lexer::Token data)
+    {
+        auto it = vars.find(node->children[0]->expression.second);
+        if(it != vars.end())
+        {
+            *(it->second) = std::make_pair(data.first, data.second);
+            return it->second->GetData();
+        }
+        return data;
+    };
+
+    if(node->children.size() == 2) // Improve
     {
         leftRet = GetReturn(node->children[0], vars);
         rightRet = GetReturn(node->children[1], vars);
@@ -45,40 +54,51 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
     {
     case Lexer::Lexeme::ReservedWord:
     {
-        if(node->children.size() > 1)
-            if(node->children[1]->expression.first == Lexer::Lexeme::CurlyBraceOpen)
+        if(node->children.size() > 0)
+        {
+            AST::NodeList nodes;
+            std::vector<Lexer::Token> args;
+
+            if(node->children.size() > 1)
             {
-                auto nodes = GetCommaSeparatedNodes(node->children[0]);
-                std::vector<Lexer::Token> args;
+                nodes = GetCommaSeparatedNodes(node->children[0]);
                 for(auto& i : nodes)
                     args.push_back(GetReturn(i, vars));
-
-                auto c = node->children[1]->children;
-
-                if(node->expression.second == "if")
-                {
-                    if(std::find(args.begin(), args.end(), Lexer::Token(Lexer::Lexeme::Bool, "false")) == args.end())
-                        for(auto i : c)
-                            GetReturn(i, vars);
-                    break;
-                }
-
-                if(node->expression.second == "while")
-                {
-                    while(std::find(args.begin(), args.end(), Lexer::Token(Lexer::Lexeme::Bool, "false")) == args.end())
-                    {
-                        for(auto i : c)
-                            GetReturn(i, vars);
-                        args.clear();
-                        for(auto i : node->children[0]->children)
-                            if(i->expression.first != Lexer::Lexeme::None && 
-                            i->expression.first != Lexer::Lexeme::CurlyBraceOpen)
-                                args.push_back(GetReturn(i, vars));
-                    }
-                }
-
-                return { Lexer::Lexeme::None, "" };
             }
+
+            if(node->expression.second == "if" || (node->expression.second == "elseif" && !skipElse))
+            {
+                skipElse = false;
+
+                if(std::find(args.begin(), args.end(), Lexer::Token(Lexer::Lexeme::Bool, "false")) == args.end())
+                {
+                    skipElse = true;
+
+                    for(auto i : node->children[1]->children)
+                        ret = GetReturn(i, vars);
+                }
+            }
+            else if(node->expression.second == "else" && !skipElse)
+            {
+                skipElse = true;
+
+                for(auto i : node->children[0]->children)
+                    ret = GetReturn(i, vars);
+            }
+            else if(node->expression.second == "while")
+            {
+                while(std::find(args.begin(), args.end(), Lexer::Token(Lexer::Lexeme::Bool, "false")) == args.end())
+                {
+                    for(auto i : node->children[1]->children)
+                        ret = GetReturn(i, vars);
+                    args.clear();
+                    for(auto i : node->children)
+                        args.push_back(GetReturn(i, vars));
+                }
+            }
+
+            return ret;
+        }
         return node->expression;
     }
 
@@ -132,20 +152,22 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                 return node->children[0]->expression;
             }
 
-        auto it = vars.find(node->children[0]->expression.second);
-        if(it != vars.end())
-        {
-            *(it->second) = std::make_pair(rightRet.first, rightRet.second);
-            return it->second->GetData();
-        }
-        return rightRet;
+        return assign(rightRet);
     }
+
+    case Lexer::Lexeme::AddAssign: return assign(Add(leftRet, rightRet));
+    case Lexer::Lexeme::SubtractAssign: return assign(Subtract(leftRet, rightRet));
+    case Lexer::Lexeme::MultiplyAssign: return assign(Multiply(leftRet, rightRet));
+    case Lexer::Lexeme::DivideAssign: return assign(Divide(leftRet, rightRet));
 
     case Lexer::Lexeme::IsEqual: return IsEqual(leftRet, rightRet);
     case Lexer::Lexeme::IsLess: return IsLess(leftRet, rightRet);
     case Lexer::Lexeme::IsGreater: return IsGreater(leftRet, rightRet);
     case Lexer::Lexeme::IsLessOrEqual: return IsLessOrEqual(leftRet, rightRet);
     case Lexer::Lexeme::IsGreaterOrEqual: return IsGreaterOrEqual(leftRet, rightRet);
+    case Lexer::Lexeme::And: return And(leftRet, rightRet);
+    case Lexer::Lexeme::Or: return Or(leftRet, rightRet);
+
     case Lexer::Lexeme::Plus: return Add(leftRet, rightRet);
     case Lexer::Lexeme::Minus: return Subtract(leftRet, rightRet);
     case Lexer::Lexeme::Multiply: return Multiply(leftRet, rightRet);
