@@ -72,22 +72,27 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             operators.push(std::make_shared<Node>(*i));
             break;
             
-        case Lexer::Lexeme::BraceClose:
+        case Lexer::Lexeme::BraceClose: // needs improvements
         {
             while(!operators.empty() && operators.top()->expression.first != Lexer::Lexeme::BraceOpen)
                 addChild();
             operators.pop();
+            
             if(!operators.empty())
                 if(GetOperatorPriority(operators.top()->expression.first) == 2)
                     break;
-                    
-            auto top = values.top(); values.pop();
-            values.top()->children.push_back(top);
+
+            if(values.size() > 1)
+            {
+                auto top = values.top(); values.pop();
+                values.top()->children.push_back(top);
+            }
             break;
         }
 
         case Lexer::Lexeme::Minus:
         case Lexer::Lexeme::Plus:
+        case Lexer::Lexeme::Pow:
         case Lexer::Lexeme::AddAssign:
         case Lexer::Lexeme::SubtractAssign:
         case Lexer::Lexeme::MultiplyAssign:
@@ -100,6 +105,10 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::IsEqual:
         case Lexer::Lexeme::And:
         case Lexer::Lexeme::Or:
+        case Lexer::Lexeme::BitwiseAnd:
+        case Lexer::Lexeme::BitwiseOr:
+        case Lexer::Lexeme::LeftShift:
+        case Lexer::Lexeme::RightShift:
         case Lexer::Lexeme::Equal:
         case Lexer::Lexeme::Multiply:
         case Lexer::Lexeme::Divide:
@@ -162,11 +171,16 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::IsEqual: return 3;
     case Lexer::Lexeme::And: return 1;
     case Lexer::Lexeme::Or: return 1;
+    case Lexer::Lexeme::BitwiseAnd: return 3;
+    case Lexer::Lexeme::BitwiseOr: return 3;
+    case Lexer::Lexeme::LeftShift: return 4;
+    case Lexer::Lexeme::RightShift: return 4;
     case Lexer::Lexeme::Equal: return 2;
     case Lexer::Lexeme::Plus: return 3;
     case Lexer::Lexeme::Minus: return 3;
     case Lexer::Lexeme::Multiply: return 4;
     case Lexer::Lexeme::Divide: return 4;
+    case Lexer::Lexeme::Pow: return 5;
     case Lexer::Lexeme::AddAssign: return 2;
     case Lexer::Lexeme::SubtractAssign: return 2;
     case Lexer::Lexeme::MultiplyAssign: return 2;

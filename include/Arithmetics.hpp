@@ -1,4 +1,6 @@
 #pragma once
+#include <cmath>
+
 #include "Lexer.hpp"
 
 static Lexer::Token IsLess(Lexer::Token left, Lexer::Token right)
@@ -76,6 +78,26 @@ static Lexer::Token Or(Lexer::Token left, Lexer::Token right)
     return { Lexer::Lexeme::Bool, left.second == "true" || right.second == "true" ? "true" : "false" };
 }
 
+static Lexer::Token BitwiseAnd(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) & stoi(right.second)) };
+}
+
+static Lexer::Token BitwiseOr(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) | stoi(right.second)) };
+}
+
+static Lexer::Token LeftShift(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) << stoi(right.second)) };
+}
+
+static Lexer::Token RightShift(Lexer::Token left, Lexer::Token right)
+{
+    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) >> stoi(right.second)) };
+}
+
 static Lexer::Token Add(Lexer::Token left, Lexer::Token right)
 {
     switch (left.first)
@@ -125,6 +147,19 @@ static Lexer::Token Divide(Lexer::Token left, Lexer::Token right)
         return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) / stoi(right.second)) };
     case Lexer::Lexeme::Float:
         return { Lexer::Lexeme::Float, std::to_string(stof(left.second) / stof(right.second)) };
+    }
+
+    return { Lexer::Lexeme::None, "" };
+}
+
+static Lexer::Token Pow(Lexer::Token left, Lexer::Token right)
+{
+    switch (left.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Int, std::to_string(std::pow(stof(left.second), stof(right.second))) };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Float, std::to_string(std::pow(stof(left.second), stof(right.second))) };
     }
 
     return { Lexer::Lexeme::None, "" };

@@ -166,11 +166,16 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
     case Lexer::Lexeme::IsGreaterOrEqual: return IsGreaterOrEqual(leftRet, rightRet);
     case Lexer::Lexeme::And: return And(leftRet, rightRet);
     case Lexer::Lexeme::Or: return Or(leftRet, rightRet);
+    case Lexer::Lexeme::BitwiseAnd: return BitwiseAnd(leftRet, rightRet);
+    case Lexer::Lexeme::BitwiseOr: return BitwiseOr(leftRet, rightRet);
+    case Lexer::Lexeme::LeftShift: return LeftShift(leftRet, rightRet);
+    case Lexer::Lexeme::RightShift: return RightShift(leftRet, rightRet);
 
     case Lexer::Lexeme::Plus: return Add(leftRet, rightRet);
     case Lexer::Lexeme::Minus: return Subtract(leftRet, rightRet);
     case Lexer::Lexeme::Multiply: return Multiply(leftRet, rightRet);
     case Lexer::Lexeme::Divide: return Divide(leftRet, rightRet);
+    case Lexer::Lexeme::Pow: return Pow(leftRet, rightRet);
     }
 
     return { Lexer::Lexeme::None, "" };

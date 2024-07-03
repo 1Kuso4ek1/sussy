@@ -43,8 +43,12 @@ public:
         IsGreater,
         IsLessOrEqual,
         IsGreaterOrEqual,
+        BitwiseAnd,
+        BitwiseOr,
         And,
-        Or
+        Or,
+        LeftShift,
+        RightShift
     };
     
     using Token = std::pair<Lexer::Lexeme, std::string>;

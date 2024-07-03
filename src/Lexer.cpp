@@ -91,13 +91,15 @@ void Lexer::Tokenize(const std::string& input)
                 tokens.back().second = "**";
                 return;
             }
-            else if(l == Lexeme::And && tokens.back().first == Lexeme::And) // kinda useless for now
+            else if(l == Lexeme::BitwiseAnd && tokens.back().first == Lexeme::BitwiseAnd)
             {
+                tokens.back().first = Lexeme::And;
                 tokens.back().second = "&&";
                 return;
             }
-            else if(l == Lexeme::Or && tokens.back().first == Lexeme::Or)
+            else if(l == Lexeme::BitwiseOr && tokens.back().first == Lexeme::BitwiseOr)
             {
+                tokens.back().first = Lexeme::Or;
                 tokens.back().second = "||";
                 return;
             }
@@ -129,6 +131,18 @@ void Lexer::Tokenize(const std::string& input)
             {
                 tokens.back().first = Lexeme::Arrow;
                 tokens.back().second = "->";
+                return;
+            }
+            else if(l == Lexeme::IsLess && tokens.back().first == Lexeme::IsLess)
+            {
+                tokens.back().first = Lexeme::LeftShift;
+                tokens.back().second = "<<";
+                return;
+            }
+            else if(l == Lexeme::IsGreater && tokens.back().first == Lexeme::IsGreater)
+            {
+                tokens.back().first = Lexeme::RightShift;
+                tokens.back().second = ">>";
                 return;
             }
             res = { l, std::string(1, i) };
@@ -165,8 +179,8 @@ void Lexer::Tokenize(const std::string& input)
         case '/': singleChar(Lexeme::Divide, i); break;
         case '<': singleChar(Lexeme::IsLess, i); break;
         case '>': singleChar(Lexeme::IsGreater, i); break;
-        case '&': singleChar(Lexeme::And, i); break;
-        case '|': singleChar(Lexeme::Or, i); break;
+        case '&': singleChar(Lexeme::BitwiseAnd, i); break;
+        case '|': singleChar(Lexeme::BitwiseOr, i); break;
         case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case '#': openedComment = !openedComment; break;
