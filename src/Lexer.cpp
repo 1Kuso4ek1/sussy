@@ -6,6 +6,8 @@ Lexer::Lexer(const std::string& inputFilename)
 	if(!file.is_open())
 		return;
 
+    //std::filesystem::current_path(std::filesystem::path(inputFilename).parent_path());
+
 	std::string code;
 	std::copy(std::istreambuf_iterator<char>(file),
 			  std::istreambuf_iterator<char>(),
@@ -121,6 +123,12 @@ void Lexer::Tokenize(const std::string& input)
             {
                 tokens.back().first = Lexeme::DivideAssign;
                 tokens.back().second = "/=";
+                return;
+            }
+            else if(l == Lexeme::IsGreater && tokens.back().first == Lexeme::Minus)
+            {
+                tokens.back().first = Lexeme::Arrow;
+                tokens.back().second = "->";
                 return;
             }
             res = { l, std::string(1, i) };

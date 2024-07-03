@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
+#include <filesystem>
 
 #include "Utils.hpp"
 
@@ -22,6 +23,7 @@ public:
         BraceClose,
         CurlyBraceOpen,
         CurlyBraceClose,
+        Arrow,
         Dot,
         Comma,
         Semicolon,

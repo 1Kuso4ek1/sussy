@@ -1,53 +1,23 @@
 # JESUS CHRIST, A CALCULATOR!!! #
 
 import "../math.sus"
-
-inputNumber = ()
-{
-    print("Enter a number: ");
-    int(input());
-}
-
-inputOperator = ()
-{
-    print("Enter an operator (+-*/!): ");
-    input();
-}
+import "../input.sus"
 
 a = inputNumber();
 op = inputOperator();
 
-if(op == "!")
-{
-    print(a); print(op);
-    print("=");
-    println(fact(a));
-}
+if(op == "!") -> 
+    println(string(a) + op + " = " + fact(a));
 else
 {
     b = inputNumber();
 
-    print(a); print(op); print(b);
-    print("=");
+    print(string(a) + " " + op + " " + b + " = ");
 
-    if(op == "+")
-    {
-        println(a + b);
-    }
-    elseif(op == "-")
-    {
-        println(a - b);
-    }
-    elseif(op == "*")
-    {
-        println(a * b);
-    }
-    elseif(op == "/")
-    {
-        println(a / b);
-    }
-    else
-    {
-        println("Error: unknown operation.");
-    }
+    if    (op == "+") -> println(a + b);
+    elseif(op == "-") -> println(a - b);
+    elseif(op == "*") -> println(a * b);
+    elseif(op == "/") -> println(a / b);
+
+    else -> println("Error: unknown operation.");
 }

@@ -37,5 +37,7 @@ static std::unordered_map<std::string, Function> functions =
     { "int", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
                           [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Int, v["value"]->GetData().second }; }) },
     { "float", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) }
+                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) },
+    { "string", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::String, v["value"]->GetData().second }; }) }
 };

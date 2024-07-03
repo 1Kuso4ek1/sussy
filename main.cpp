@@ -15,6 +15,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::BraceClose: std::cout << "{ Lexeme::BraceClose, "; break;
     case Lexer::Lexeme::CurlyBraceOpen: std::cout << "{ Lexeme::CurlyBraceOpen, "; break;
     case Lexer::Lexeme::CurlyBraceClose: std::cout << "{ Lexeme::CurlyBraceClose, "; break;
+    case Lexer::Lexeme::Arrow: std::cout << "{ Lexeme::Arrow, "; break;
     case Lexer::Lexeme::ReservedWord: std::cout << "{ Lexeme::ReservedWord, "; break;
     case Lexer::Lexeme::Word: std::cout << "{ Lexeme::Word, "; break;
     case Lexer::Lexeme::IsEqual: std::cout << "{ Lexeme::IsEqual, "; break;
@@ -55,13 +56,10 @@ int main(int argc, char** argv)
 
     AST ast(res);
 
-    PrintAST(ast.GetRootNode());
+    if(argc == 3)
+        if(std::string(argv[2]) == "--ast")
+            PrintAST(ast.GetRootNode());
 
     for(auto i : ast.GetRootNode()->children)
         GetReturn(i, variables);
-    
-    /*for(auto [name, func] : functions)
-        std::cout << name << " " << std::endl;
-    for(auto [name, var] : variables)
-        std::cout << name << " " << var->GetData().second << std::endl;*/
 }

@@ -4,6 +4,8 @@ project(sussy VERSION 0.0.0 LANGUAGES CXX)
 
 add_executable(sussy main.cpp src/Lexer.cpp src/AST.cpp src/Variable.cpp src/Function.cpp src/Exec.cpp)
 
+target_link_libraries(sussy stdc++fs)
+
 set_target_properties(sussy PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(sussy

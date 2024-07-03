@@ -73,10 +73,18 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             break;
             
         case Lexer::Lexeme::BraceClose:
+        {
             while(!operators.empty() && operators.top()->expression.first != Lexer::Lexeme::BraceOpen)
                 addChild();
             operators.pop();
+            if(!operators.empty())
+                if(GetOperatorPriority(operators.top()->expression.first) == 2)
+                    break;
+                    
+            auto top = values.top(); values.pop();
+            values.top()->children.push_back(top);
             break;
+        }
 
         case Lexer::Lexeme::Minus:
         case Lexer::Lexeme::Plus:
@@ -103,6 +111,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::CurlyBraceClose:
             curlyBraces.pop(); break;
 
+        case Lexer::Lexeme::Arrow:
         case Lexer::Lexeme::CurlyBraceOpen:
         case Lexer::Lexeme::Semicolon:
             while(!operators.empty())
@@ -115,7 +124,12 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             else
                 curlyBraces.top()->children.push_back(values.top());
 
-            if(i->first == Lexer::Lexeme::CurlyBraceOpen)
+            if(curlyBraces.size() > 0)
+                if(curlyBraces.top()->expression.first == Lexer::Lexeme::Arrow)
+                    curlyBraces.pop();
+
+            if(i->first == Lexer::Lexeme::CurlyBraceOpen || 
+               i->first == Lexer::Lexeme::Arrow)
             {
                 curlyBraces.push(std::make_shared<Node>(*i));
                 values.top()->children.push_back(curlyBraces.top());
