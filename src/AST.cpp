@@ -59,6 +59,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::String:
         case Lexer::Lexeme::Int:
         case Lexer::Lexeme::Float:
+        case Lexer::Lexeme::Bool:
             values.push(std::make_shared<Node>(*i)); break;
 
         case Lexer::Lexeme::BraceOpen:

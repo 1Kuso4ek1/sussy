@@ -23,7 +23,8 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                 vars[node->expression.second] = std::make_shared<Variable>();
             else return it->second->GetData();
         }
-        return node->expression;
+        else if(node->expression.first != Lexer::Lexeme::ReservedWord)
+            return node->expression;
     }
 
     Lexer::Token leftRet;
@@ -32,6 +33,8 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
     Lexer::Token ret = { Lexer::Lexeme::None, "" };
 
     static bool skipElse = false;
+    static bool breakBlock = false;
+    static bool continueBlock = false;
 
     auto assign = [&](Lexer::Token data)
     {
@@ -44,7 +47,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
         return data;
     };
 
-    if(node->children.size() == 2) // Improve
+    if(node->children.size() == 2 && node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
     {
         leftRet = GetReturn(node->children[0], vars);
         rightRet = GetReturn(node->children[1], vars);
@@ -87,10 +90,19 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
             }
             else if(node->expression.second == "while")
             {
+                breakBlock = continueBlock = false;
+
                 while(std::find(args.begin(), args.end(), Lexer::Token(Lexer::Lexeme::Bool, "false")) == args.end())
                 {
                     for(auto i : node->children[1]->children)
-                        ret = GetReturn(i, vars);
+                    {
+                        if(breakBlock || continueBlock) break;
+                        else ret = GetReturn(i, vars);
+                    }
+                    
+                    if(breakBlock) break;
+                    continueBlock = false;
+
                     args.clear();
                     args.push_back(GetReturn(node->children[0], vars));
                 }
@@ -98,6 +110,10 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
 
             return ret;
         }
+        
+        breakBlock = (node->expression.second == "break");
+        continueBlock = (node->expression.second == "continue");
+
         return node->expression;
     }
 
