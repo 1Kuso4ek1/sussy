@@ -13,42 +13,18 @@ public:
     enum class Lexeme
     {
         None,
-        Word,
-        ReservedWord,
-        Int,
-        Bool,
-        Float,
-        String,
-        BraceOpen,
-        BraceClose,
-        CurlyBraceOpen,
-        CurlyBraceClose,
-        Arrow,
-        Dot,
-        Comma,
-        Semicolon,
-        Quote,
-        Equal,
-        Plus,
-        Minus,
-        Multiply,
-        Divide,
-        Pow,
-        AddAssign,
-        SubtractAssign,
-        MultiplyAssign,
-        DivideAssign,
-        IsEqual,
-        IsLess,
-        IsGreater,
-        IsLessOrEqual,
-        IsGreaterOrEqual,
-        BitwiseAnd,
-        BitwiseOr,
-        And,
-        Or,
-        LeftShift,
-        RightShift
+        Word, ReservedWord,
+        Int, Bool, Float, String,
+        
+        BraceOpen, BraceClose, CurlyBraceOpen, CurlyBraceClose, Arrow, Dot, Comma, Semicolon, Quote,
+        
+        Equal, Plus, Minus, Multiply, Divide, Pow, InRange,
+        
+        AddAssign, SubtractAssign, MultiplyAssign, DivideAssign,
+        
+        IsEqual, IsLess, IsGreater, IsLessOrEqual, IsGreaterOrEqual,
+
+        BitwiseAnd, BitwiseOr, And, Or, LeftShift, RightShift
     };
     
     using Token = std::pair<Lexer::Lexeme, std::string>;

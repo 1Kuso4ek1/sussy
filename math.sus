@@ -9,5 +9,5 @@ fact = (num)
         i += 1;
     }
 
-    res;
+    return res;
 }

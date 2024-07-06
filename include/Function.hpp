@@ -1,8 +1,9 @@
 #pragma once
-#include "AST.hpp"
-#include "Variable.hpp"
 #include <functional>
 #include <iostream>
+
+#include "AST.hpp"
+#include "Variable.hpp"
 
 class Function
 {
@@ -27,7 +28,9 @@ private:
     std::function<Lexer::Token(VarMap)> cppbody;
 };
 
-static std::unordered_map<std::string, Function> functions = 
+using FunctionMap = std::unordered_map<std::string, Function>;
+
+static FunctionMap functions = 
 {
     { "print", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
                         [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second; return { Lexer::Lexeme::None, "" }; }) },

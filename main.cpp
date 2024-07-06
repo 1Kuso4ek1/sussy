@@ -11,6 +11,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     {
     case Lexer::Lexeme::None: std::cout << "{ Lexeme::None, "; break;
     case Lexer::Lexeme::Comma: std::cout << "{ Lexeme::Comma, "; break;
+    case Lexer::Lexeme::Dot: std::cout << "{ Lexeme::Dot, "; break;
     case Lexer::Lexeme::BraceOpen: std::cout << "{ Lexeme::BraceOpen, "; break;
     case Lexer::Lexeme::BraceClose: std::cout << "{ Lexeme::BraceClose, "; break;
     case Lexer::Lexeme::CurlyBraceOpen: std::cout << "{ Lexeme::CurlyBraceOpen, "; break;
@@ -31,6 +32,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::RightShift: std::cout << "{ Lexeme::RightShift, "; break;
     case Lexer::Lexeme::Pow: std::cout << "{ Lexeme::Pow, "; break;
     case Lexer::Lexeme::Equal: std::cout << "{ Lexeme::Equal, "; break;
+    case Lexer::Lexeme::InRange: std::cout << "{ Lexeme::InRange, "; break;
     case Lexer::Lexeme::Plus: std::cout << "{ Lexeme::Plus, "; break;
     case Lexer::Lexeme::Minus: std::cout << "{ Lexeme::Minus, "; break;
     case Lexer::Lexeme::Multiply: std::cout << "{ Lexeme::Multiply, "; break;

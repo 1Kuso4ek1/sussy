@@ -6,7 +6,7 @@ Lexer::Lexer(const std::string& inputFilename)
 	if(!file.is_open())
 		return;
 
-    //std::filesystem::current_path(std::filesystem::path(inputFilename).parent_path());
+    std::filesystem::current_path(std::filesystem::absolute(std::filesystem::path(inputFilename)).parent_path());
 
 	std::string code;
 	std::copy(std::istreambuf_iterator<char>(file),
@@ -133,6 +133,12 @@ void Lexer::Tokenize(const std::string& input)
                 tokens.back().second = "->";
                 return;
             }
+            else if(l == Lexeme::IsGreater && tokens.back().first == Lexeme::Equal)
+            {
+                tokens.back().first = Lexeme::InRange;
+                tokens.back().second = "=>";
+                return;
+            }
             else if(l == Lexeme::IsLess && tokens.back().first == Lexeme::IsLess)
             {
                 tokens.back().first = Lexeme::LeftShift;
@@ -198,7 +204,8 @@ void Lexer::Tokenize(const std::string& input)
         case '.':
             if(res.first == Lexeme::Int) { res.first = Lexeme::Float; res.second += i; }
             else if(openedQuote) res.second += i;
-            else if(res.first == Lexeme::None) res = { Lexeme::Dot, std::string(1, i) }; 
+            //else if(res.first == Lexeme::None) res = { Lexeme::Dot, std::string(1, i) }; 
+            else singleChar(Lexeme::Dot, i);
             break;
 
         default:

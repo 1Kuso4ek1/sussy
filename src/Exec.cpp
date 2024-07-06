@@ -23,7 +23,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                 vars[node->expression.second] = std::make_shared<Variable>();
             else return it->second->GetData();
         }
-        else if(node->expression.first != Lexer::Lexeme::ReservedWord)
+        if(node->expression.first != Lexer::Lexeme::ReservedWord)
             return node->expression;
     }
 
@@ -35,6 +35,7 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
     static bool skipElse = false;
     static bool breakBlock = false;
     static bool continueBlock = false;
+    static bool returnValue = false;
 
     auto assign = [&](Lexer::Token data)
     {
@@ -107,6 +108,37 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                     args.push_back(GetReturn(node->children[0], vars));
                 }
             }
+            else if(node->expression.second == "for")
+            {
+                breakBlock = continueBlock = false;
+
+                auto iteratorVar = vars.find(args[0].second);
+                int start = stoi(args[2].second);
+                int end = stoi(args.back().second);
+
+                for(int i = start; (start < end ? i < end : i > end); i += (start < end ? 1 : -1))
+                {
+                    *iteratorVar->second = std::make_pair(Lexer::Lexeme::Int, std::to_string(i));
+
+                    for(auto i : node->children[1]->children)
+                    {
+                        if(breakBlock || continueBlock) break;
+                        else ret = GetReturn(i, vars);
+                    }
+                    
+                    if(breakBlock) break;
+                    continueBlock = false;
+                }
+
+                vars.erase(iteratorVar);
+            }
+            else if(node->expression.second == "return")
+            {
+                returnValue = true;
+                if(node->children.size() > 0)
+                    ret = GetReturn(node->children[0], vars);
+            }
+
 
             return ret;
         }
@@ -137,16 +169,21 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
             if(!it->second.GetBody())
                 return it->second.Execute();
 
+            returnValue = false;
+
             Lexer::Token ret;
             auto c = it->second.GetBody()->children;
-            for(auto i = c.begin(); i < c.end(); i++)
+            for(auto i = c.begin(); i < c.end() && !returnValue; i++)
                 ret = GetReturn(*i, it->second.GetLocalVariables());
+
+            returnValue = false;
 
             return ret;
         }
         return node->expression;
     }
 
+    case Lexer::Lexeme::InRange: assign(rightRet); return leftRet;
     case Lexer::Lexeme::Equal:
     {
         if(node->children.size() > 2)

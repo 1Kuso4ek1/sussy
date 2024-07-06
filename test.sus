@@ -1,23 +1,23 @@
 # JESUS CHRIST, A CALCULATOR!!! #
 
-import "../math.sus"
-import "../input.sus"
+import "math.sus"
+import "input.sus"
 
 a = inputNumber();
 op = inputOperator();
 
-if(op == "!") -> 
+if(op == '!') -> 
     println(string(a) + op + " = " + fact(a));
 else
 {
     b = inputNumber();
 
-    print(string(a) + " " + op + " " + b + " = ");
+    print(string(a) + ' ' + op + ' ' + b + " = ");
 
-    if    (op == "+") -> println(a + b);
-    elseif(op == "-") -> println(a - b);
-    elseif(op == "*") -> println(a * b);
-    elseif(op == "/") -> 
+    if    (op == '+') -> println(a + b);
+    elseif(op == '-') -> println(a - b);
+    elseif(op == '*') -> println(a * b);
+    elseif(op == '/') -> 
         if(b == 0) -> println("Error: division by zero.");
         else -> println(a / b);
 

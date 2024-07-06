@@ -99,6 +99,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::MultiplyAssign:
         case Lexer::Lexeme::DivideAssign:
         case Lexer::Lexeme::Comma:
+        case Lexer::Lexeme::Dot:
         case Lexer::Lexeme::IsLess:
         case Lexer::Lexeme::IsGreater:
         case Lexer::Lexeme::IsLessOrEqual:
@@ -113,6 +114,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::Equal:
         case Lexer::Lexeme::Multiply:
         case Lexer::Lexeme::Divide:
+        case Lexer::Lexeme::InRange:
             while(!operators.empty() && GetOperatorPriority(operators.top()->expression.first) >= GetOperatorPriority(i->first))
                 addChild();
             operators.push(std::make_shared<Node>(*i));
@@ -165,6 +167,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     switch(lexeme)
     {
     case Lexer::Lexeme::Comma: return 17;
+    case Lexer::Lexeme::Dot: return 1;
     case Lexer::Lexeme::IsLess: return 3;
     case Lexer::Lexeme::IsGreater: return 3;
     case Lexer::Lexeme::IsLessOrEqual: return 3;
@@ -176,6 +179,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::BitwiseOr: return 3;
     case Lexer::Lexeme::LeftShift: return 4;
     case Lexer::Lexeme::RightShift: return 4;
+    case Lexer::Lexeme::InRange: return 3;
     case Lexer::Lexeme::Equal: return 2;
     case Lexer::Lexeme::Plus: return 3;
     case Lexer::Lexeme::Minus: return 3;
