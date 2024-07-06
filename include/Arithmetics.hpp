@@ -3,6 +3,14 @@
 
 #include "Lexer.hpp"
 
+static Lexer::Token Index(Lexer::Token left, Lexer::Token right)
+{
+    if(left.first == Lexer::Lexeme::String)
+        return { Lexer::Lexeme::String, std::string(1, left.second[stoi(right.second)]) };
+
+    return { Lexer::Lexeme::None, "" };
+}
+
 static Lexer::Token IsLess(Lexer::Token left, Lexer::Token right)
 {
     switch (left.first)

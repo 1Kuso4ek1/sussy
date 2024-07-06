@@ -207,6 +207,8 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
         return assign(rightRet);
     }
 
+    case Lexer::Lexeme::Colon: return Index(leftRet, rightRet);
+
     case Lexer::Lexeme::AddAssign: return assign(Add(leftRet, rightRet));
     case Lexer::Lexeme::SubtractAssign: return assign(Subtract(leftRet, rightRet));
     case Lexer::Lexeme::MultiplyAssign: return assign(Multiply(leftRet, rightRet));

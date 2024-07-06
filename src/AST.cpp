@@ -115,6 +115,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::Multiply:
         case Lexer::Lexeme::Divide:
         case Lexer::Lexeme::InRange:
+        case Lexer::Lexeme::Colon:
             while(!operators.empty() && GetOperatorPriority(operators.top()->expression.first) >= GetOperatorPriority(i->first))
                 addChild();
             operators.push(std::make_shared<Node>(*i));
@@ -180,6 +181,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::LeftShift: return 4;
     case Lexer::Lexeme::RightShift: return 4;
     case Lexer::Lexeme::InRange: return 3;
+    case Lexer::Lexeme::Colon: return 4;
     case Lexer::Lexeme::Equal: return 2;
     case Lexer::Lexeme::Plus: return 3;
     case Lexer::Lexeme::Minus: return 3;

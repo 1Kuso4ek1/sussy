@@ -33,6 +33,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::Pow: std::cout << "{ Lexeme::Pow, "; break;
     case Lexer::Lexeme::Equal: std::cout << "{ Lexeme::Equal, "; break;
     case Lexer::Lexeme::InRange: std::cout << "{ Lexeme::InRange, "; break;
+    case Lexer::Lexeme::Colon: std::cout << "{ Lexeme::Colon, "; break;
     case Lexer::Lexeme::Plus: std::cout << "{ Lexeme::Plus, "; break;
     case Lexer::Lexeme::Minus: std::cout << "{ Lexeme::Minus, "; break;
     case Lexer::Lexeme::Multiply: std::cout << "{ Lexeme::Multiply, "; break;

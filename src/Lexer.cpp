@@ -187,6 +187,7 @@ void Lexer::Tokenize(const std::string& input)
         case '>': singleChar(Lexeme::IsGreater, i); break;
         case '&': singleChar(Lexeme::BitwiseAnd, i); break;
         case '|': singleChar(Lexeme::BitwiseOr, i); break;
+        case ':': singleChar(Lexeme::Colon, i); break;
         case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case '#': openedComment = !openedComment; break;
