@@ -18,7 +18,7 @@ public:
         
         BraceOpen, BraceClose, CurlyBraceOpen, CurlyBraceClose, Arrow, Dot, Comma, Semicolon, Quote,
         
-        Equal, Plus, Minus, Multiply, Divide, Pow, InRange, Colon,
+        Equal, Plus, Minus, Multiply, Divide, Pow, Mod, InRange, Colon,
         
         AddAssign, SubtractAssign, MultiplyAssign, DivideAssign,
         

@@ -6,6 +6,17 @@
 class Variable
 {
 public:
+    enum class VariableType
+    {
+        None,
+        Int,
+        Float,
+        Bool,
+        String,
+        Array,
+        Object
+    };
+
     Variable() {}
     Variable(Lexer::Token data) : data(data) {}
 

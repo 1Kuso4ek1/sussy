@@ -172,3 +172,16 @@ static Lexer::Token Pow(Lexer::Token left, Lexer::Token right)
 
     return { Lexer::Lexeme::None, "" };
 }
+
+static Lexer::Token Mod(Lexer::Token left, Lexer::Token right)
+{
+    switch (left.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) % stoi(right.second)) };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Float, std::to_string(fmod(stof(left.second), stof(right.second))) };
+    }
+
+    return { Lexer::Lexeme::None, "" };
+}

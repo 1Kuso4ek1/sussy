@@ -94,6 +94,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::Minus:
         case Lexer::Lexeme::Plus:
         case Lexer::Lexeme::Pow:
+        case Lexer::Lexeme::Mod:
         case Lexer::Lexeme::AddAssign:
         case Lexer::Lexeme::SubtractAssign:
         case Lexer::Lexeme::MultiplyAssign:
@@ -180,6 +181,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::BitwiseOr: return 3;
     case Lexer::Lexeme::LeftShift: return 4;
     case Lexer::Lexeme::RightShift: return 4;
+    case Lexer::Lexeme::Mod: return 4;
     case Lexer::Lexeme::InRange: return 3;
     case Lexer::Lexeme::Colon: return 4;
     case Lexer::Lexeme::Equal: return 2;

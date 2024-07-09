@@ -6,6 +6,6 @@ inputNumber = ()
 
 inputOperator = ()
 {
-    print("Enter an operator (+-*/!): ");
+    print("Enter an operator (+-*/!^): ");
     input();
 }

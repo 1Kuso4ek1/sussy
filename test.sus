@@ -17,6 +17,7 @@ else
     if    (op == '+') -> println(a + b);
     elseif(op == '-') -> println(a - b);
     elseif(op == '*') -> println(a * b);
+    elseif(op == '^') -> println(a ** b);
     elseif(op == '/')
     {
         if(b == 0) -> println("Error: division by zero.");
