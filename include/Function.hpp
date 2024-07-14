@@ -42,5 +42,7 @@ static FunctionMap functions =
     { "float", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
                           [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) },
     { "string", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::String, v["value"]->GetData().second }; }) }
+                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::String, v["value"]->GetData().second }; }) },
+    { "bool", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Bool, v["value"]->GetData().second }; }) }
 };
