@@ -95,7 +95,6 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                     if(returnValue) break;
                 }
             }
-            
             else if(node->expression.second == "switch")
             {
                 breakBlock = continueBlock = false;
@@ -118,7 +117,6 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                     }
                 }
             }
-
             else if(node->expression.second == "while")
             {
                 breakBlock = continueBlock = false;
@@ -172,7 +170,6 @@ Lexer::Token GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
                 if(node->children.size() > 0)
                     ret = GetReturn(node->children[0], vars);
             }
-
 
             return ret;
         }
