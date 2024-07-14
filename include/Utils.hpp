@@ -2,4 +2,4 @@
 #include <string>
 #include <vector>
 
-const std::vector<std::string> reservedWords =  { "if", "else", "elseif", "for", "while", "break", "continue", "struct", "return" };
+const std::vector<std::string> reservedWords = { "if", "else", "elseif", "for", "while", "break", "continue", "struct", "return", "switch", "case", "default" };

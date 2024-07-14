@@ -63,11 +63,11 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             values.push(std::make_shared<Node>(*i)); break;
 
         case Lexer::Lexeme::BraceOpen:
-            if((i + 1)->first == Lexer::Lexeme::BraceClose)
+            //if((i + 1)->first == Lexer::Lexeme::BraceClose)
             {
-                if(operators.size() > 1)
+                if(operators.size() > 1 && values.size() % 2 != 1)
                     values.top()->children.push_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
-                else
+                else if((i + 1)->first == Lexer::Lexeme::BraceClose)
                     values.push(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
             }
             operators.push(std::make_shared<Node>(*i));

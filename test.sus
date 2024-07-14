@@ -14,15 +14,18 @@ else
 
     print(string(a) + ' ' + op + ' ' + b + " = ");
 
-    if    (op == '+') -> println(a + b);
-    elseif(op == '-') -> println(a - b);
-    elseif(op == '*') -> println(a * b);
-    elseif(op == '^') -> println(a ** b);
-    elseif(op == '/')
+    switch(op)
     {
-        if(b == 0) -> println("Error: division by zero.");
-        else -> println(a / b);
-    }
+        case('+') -> println(a + b);
+        case('-') -> println(a - b);
+        case('*') -> println(a * b);
+        case('/')
+        {
+            if(b == 0) -> println("Error: division by zero.");
+            else -> println(a / b);
+        }
+        case('^') -> println(a ** b);
 
-    else -> println("Error: unknown operation.");
+        default() -> println("Error: unknown operation.");
+    }
 }
