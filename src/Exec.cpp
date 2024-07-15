@@ -261,6 +261,26 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
             return array->GetElement(0);
         }
+        else if(node->children[0]->expression.first == Lexer::Lexeme::Comma)
+        {
+            // make it a separate function
+            AST::NodeList nodes;
+            nodes = GetCommaSeparatedNodes(node->children[1]);
+            std::vector<std::shared_ptr<Variable>> args;
+            for(auto& i : nodes)
+                args.push_back(GetReturn(i, vars));
+
+            auto var = vars.find(node->children[0]->expression.second);
+            if(var != vars.end())
+                if(var->second->GetType() == Variable::VariableType::Array)
+                {
+                    for(int i = 0; i < args.size(); i++)
+                        var->second->SetElement(i, args[i]);
+                    return var->second->GetElement(args.size() - 1);
+                }
+
+            return std::make_shared<Variable>(node->expression);
+        }
 
         return assign(rightRet);
     }
