@@ -38,6 +38,16 @@ Variable& Variable::operator=(std::shared_ptr<Variable> variable)
     return *this;
 }
 
+bool Variable::operator==(Lexer::Token data)
+{
+    return this->data == data;
+}
+
+bool Variable::operator==(std::shared_ptr<Variable> variable)
+{
+    return this->data == variable->data;
+}
+
 std::shared_ptr<Variable> Variable::GetElement(int index)
 {
     if(index < array.size())

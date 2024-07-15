@@ -23,6 +23,9 @@ public:
     Variable& operator=(Lexer::Token data);
     Variable& operator=(std::shared_ptr<Variable> variable);
 
+    bool operator==(Lexer::Token data);
+    bool operator==(std::shared_ptr<Variable> variable);
+
     std::shared_ptr<Variable> GetElement(int index);
     VariableType GetType();
     Lexer::Token GetData();

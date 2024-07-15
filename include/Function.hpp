@@ -14,7 +14,7 @@ public:
     Function(AST::NodeList args, std::function<Lexer::Token(VarMap)> cppbody)
             : args(args), cppbody(cppbody) {}
 
-    void SetArgs(std::vector<Lexer::Token> args, VarMap& vars);
+    void SetArgs(std::vector<std::shared_ptr<Variable>> args, VarMap& vars);
 
     VarMap& GetLocalVariables();
     std::shared_ptr<AST::Node> GetBody();
