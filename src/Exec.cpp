@@ -30,7 +30,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
     std::shared_ptr<Variable> leftRet;
     std::shared_ptr<Variable> rightRet;
 
-    std::shared_ptr<Variable> ret = std::make_shared<Variable>(Lexer::Token(Lexer::Lexeme::None, ""));
+    std::shared_ptr<Variable> ret;
 
     static bool skipElse = false;
     static bool breakBlock = false;
@@ -150,7 +150,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
                 for(int i = start; (start < end ? i < end : i > end); i += (start < end ? 1 : -1))
                 {
-                    *iteratorVar->second = std::make_shared<Variable>(Lexer::Token(Lexer::Lexeme::Int, std::to_string(i)));
+                    *iteratorVar->second = Lexer::Token(Lexer::Lexeme::Int, std::to_string(i));
 
                     for(auto i : node->children[1]->children)
                     {
@@ -179,7 +179,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
         breakBlock = (node->expression.second == "break");
         continueBlock = (node->expression.second == "continue");
 
-        return std::make_shared<Variable>(node->expression);
+        return nullptr;
     }
 
     case Lexer::Lexeme::Int:
@@ -213,6 +213,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
             return ret;
         }
+        
         return std::make_shared<Variable>(node->expression);
     }
 
