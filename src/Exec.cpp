@@ -20,11 +20,15 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
         {
             auto it = vars.find(node->expression.second);
             if(it == vars.end())
+            {
                 vars[node->expression.second] = std::make_shared<Variable>();
+                return vars[node->expression.second];
+            }
             else return it->second;
         }
         if(node->expression.first != Lexer::Lexeme::ReservedWord)
             return std::make_shared<Variable>(node->expression);
+        return nullptr;
     }
 
     std::shared_ptr<Variable> leftRet;
