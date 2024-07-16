@@ -5,6 +5,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
     root = std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "root"));
 
     std::stack<std::shared_ptr<Node>> values, operators, curlyBraces;
+    std::shared_ptr<Node> bottomOperator;
 
     auto addUnaryChild = [&]()
     {
@@ -52,6 +53,9 @@ AST::AST(std::vector<Lexer::Token>& tokens)
 
     for(auto i = tokens.begin(); i < tokens.end(); i++)
     {
+        if(operators.size() == 1)
+            bottomOperator = operators.top();
+            
         switch(i->first)
         {
         case Lexer::Lexeme::ReservedWord:
@@ -65,9 +69,9 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::BraceOpen:
             //if((i + 1)->first == Lexer::Lexeme::BraceClose)
             {
-                if(operators.size() > 1 && values.size() % 2 != 1)
+                /*if(operators.size() > 1 && values.size() % 2 != 1)
                     values.top()->children.push_back(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
-                else if((i + 1)->first == Lexer::Lexeme::BraceClose)
+                else*/ if((i + 1)->first == Lexer::Lexeme::BraceClose)
                     values.push(std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "")));
             }
             operators.push(std::make_shared<Node>(*i));
@@ -79,8 +83,8 @@ AST::AST(std::vector<Lexer::Token>& tokens)
                 addChild();
             operators.pop();
             
-            if(!operators.empty())
-                if(GetOperatorPriority(operators.top()->expression.first) == 2)
+            if(bottomOperator)
+                if(GetOperatorPriority(bottomOperator->expression.first) == 2)
                     break;
 
             if(values.size() > 1)
