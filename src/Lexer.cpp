@@ -6,7 +6,8 @@ Lexer::Lexer(const std::string& inputFilename)
 	if(!file.is_open())
 		return;
 
-    std::filesystem::current_path(std::filesystem::absolute(std::filesystem::path(inputFilename)).parent_path());
+    absolutePath = std::filesystem::absolute(std::filesystem::path(inputFilename)).parent_path();
+    std::filesystem::current_path(absolutePath);
 
 	std::string code;
 	std::copy(std::istreambuf_iterator<char>(file),
@@ -170,6 +171,7 @@ void Lexer::Tokenize(const std::string& input)
             {
                 expectImportFilename = false;
                 Import(res.second);
+                std::filesystem::current_path(absolutePath);
                 res = { Lexeme::None, "" };
             }
             break;

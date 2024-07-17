@@ -37,6 +37,8 @@ private:
     void Tokenize(const std::string& input);
     void Import(const std::string& inputFilename);
 
+    std::filesystem::path absolutePath;
+
     std::vector<Token> tokens;
     std::vector<Lexer> imported;
 };

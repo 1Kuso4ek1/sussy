@@ -239,7 +239,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
                     vars.erase(it);
                 functions[node->children[0]->expression.second] = Function(args, body);
 
-                return std::make_shared<Variable>(node->children[0]->expression);
+                return nullptr;
             }
         
         if(node->children[0]->expression.first == Lexer::Lexeme::Colon)
@@ -258,7 +258,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
             return std::make_shared<Variable>(node->expression);
         }
-        else if(node->children[1]->expression.first == Lexer::Lexeme::Colon)
+        else if(node->children[1]->expression.first == Lexer::Lexeme::Colon &&
+                node->children[1]->children[0]->expression.first == Lexer::Lexeme::Int)
         {
             auto array = std::make_shared<Variable>(std::make_pair(Lexer::Lexeme::Word, node->children[0]->expression.second), Variable::VariableType::Array, stoi(GetReturn(node->children[1]->children[0], vars)->GetData().second));
             array->Fill(GetReturn(node->children[1]->children[1], vars)->GetData());
