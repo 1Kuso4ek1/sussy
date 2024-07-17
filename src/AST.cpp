@@ -87,7 +87,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
                 if(GetOperatorPriority(bottomOperator->expression.first) == 2)
                     break;
 
-            if(values.size() > 1)
+            if(values.size() > 2)
             {
                 auto top = values.top(); values.pop();
                 values.top()->children.push_back(top);
