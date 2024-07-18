@@ -358,10 +358,27 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
 
     auto getBinaryOperatorArgs = [&](std::shared_ptr<AST::Node> node)
     {
-        if(node->children.size() == 2 && node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
+        if(node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
         {
             stack.push(node->children[1]);
             stack.push(node->children[0]);
+        }
+    };
+
+    auto execBinaryOperator = [&](std::shared_ptr<AST::Node> node, std::function<Lexer::Token(Lexer::Token, Lexer::Token)> binaryOperator)
+    {
+        if(argsFound > 1)
+        {
+            auto left = valueStack.top(); valueStack.pop();
+            auto right = valueStack.top(); valueStack.pop();
+
+            valueStack.push(std::make_shared<Variable>(binaryOperator(left->GetData(), right->GetData())));
+            argsFound++;
+        }
+        else
+        {
+            stack.push(node);
+            getBinaryOperatorArgs(node);
         }
     };
 
@@ -429,26 +446,24 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
             break;
         }
 
-        case Lexer::Lexeme::Plus:
-        {
-            if(argsFound > 1)
-            {
-                auto left = valueStack.top(); valueStack.pop();
-                auto right = valueStack.top(); valueStack.pop();
+        case Lexer::Lexeme::IsEqual: execBinaryOperator(node, IsEqual); break;
+        case Lexer::Lexeme::IsLess: execBinaryOperator(node, IsLess); break;
+        case Lexer::Lexeme::IsGreater: execBinaryOperator(node, IsGreater); break;
+        case Lexer::Lexeme::IsLessOrEqual: execBinaryOperator(node, IsLessOrEqual); break;
+        case Lexer::Lexeme::IsGreaterOrEqual: execBinaryOperator(node, IsGreaterOrEqual); break;
+        case Lexer::Lexeme::And: execBinaryOperator(node, And); break;
+        case Lexer::Lexeme::Or: execBinaryOperator(node, Or); break;
+        case Lexer::Lexeme::BitwiseAnd: execBinaryOperator(node, BitwiseAnd); break;
+        case Lexer::Lexeme::BitwiseOr: execBinaryOperator(node, BitwiseOr); break;
+        case Lexer::Lexeme::LeftShift: execBinaryOperator(node, LeftShift); break;
+        case Lexer::Lexeme::RightShift: execBinaryOperator(node, RightShift); break;
 
-                valueStack.push(std::make_shared<Variable>(Add(left->GetData(), right->GetData())));
-            }
-            else
-            {
-                stack.push(node);
-                getBinaryOperatorArgs(node);
-                continue;
-            }
-
-            argsFound = false;
-
-            break;
-        }
+        case Lexer::Lexeme::Plus: execBinaryOperator(node, Add); break;
+        case Lexer::Lexeme::Minus: execBinaryOperator(node, Subtract); break;
+        case Lexer::Lexeme::Multiply: execBinaryOperator(node, Multiply); break;
+        case Lexer::Lexeme::Divide: execBinaryOperator(node, Divide); break;
+        case Lexer::Lexeme::Pow: execBinaryOperator(node, Pow); break;
+        case Lexer::Lexeme::Mod: execBinaryOperator(node, Mod); break;
         
         default:
             break;
