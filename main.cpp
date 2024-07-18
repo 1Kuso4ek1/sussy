@@ -71,5 +71,5 @@ int main(int argc, char** argv)
             PrintAST(ast.GetRootNode());
 
     for(auto i : ast.GetRootNode()->children)
-        GetReturn(i, variables);
+        GetReturnIterative(i, variables);
 }

@@ -330,3 +330,135 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
   
     return std::make_shared<Variable>(Lexer::Token(Lexer::Lexeme::None, ""));
 }
+
+void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
+{
+    std::stack<std::shared_ptr<AST::Node>> stack;
+    std::stack<std::shared_ptr<Variable>> valueStack;
+
+    stack.push(root);
+
+    static bool skipElse = false;
+    static bool breakBlock = false;
+    static bool continueBlock = false;
+    static bool returnValue = false;
+    
+    int argsFound = 0;
+
+    auto assign = [&](std::shared_ptr<AST::Node> node, std::shared_ptr<Variable> data)
+    {
+        auto it = vars.find(node->expression.second);
+        if(it != vars.end())
+        {
+            *(it->second) = data;
+            return it->second;
+        }
+        return data;
+    };
+
+    auto getBinaryOperatorArgs = [&](std::shared_ptr<AST::Node> node)
+    {
+        if(node->children.size() == 2 && node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
+        {
+            stack.push(node->children[1]);
+            stack.push(node->children[0]);
+        }
+    };
+
+    while(!stack.empty())
+    {
+        auto node = stack.top(); stack.pop();
+
+        if(node->children.empty())
+        {
+            if(node->expression.first == Lexer::Lexeme::Word)
+            {
+                auto it = vars.find(node->expression.second);
+                if(it == vars.end())
+                {
+                    vars[node->expression.second] = std::make_shared<Variable>();
+                    valueStack.push(vars[node->expression.second]);
+                }
+                else valueStack.push(it->second);
+                argsFound++;
+                continue;
+            }
+            if(node->expression.first != Lexer::Lexeme::ReservedWord)
+                valueStack.push(std::make_shared<Variable>(node->expression));
+
+            argsFound++;
+            continue;
+        }
+
+        switch(node->expression.first)
+        {
+        case Lexer::Lexeme::Equal:
+        {
+            if(node->children.size() > 2)
+                if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen)
+                {
+                    AST::NodeList args;
+                    std::shared_ptr<AST::Node> body;
+                
+                    args = GetCommaSeparatedNodes(node->children[1]);
+                    
+                    body = node->children[2];
+
+                    auto it = vars.find(node->children[0]->expression.second);
+                    if(it != vars.end())
+                        vars.erase(it);
+                    functions[node->children[0]->expression.second] = Function(args, body);
+
+                    continue;
+                }
+
+            if(argsFound > 1)
+            {
+                auto value = valueStack.top(); valueStack.pop(); valueStack.pop();
+                valueStack.push(assign(node->children[0], value));
+            }
+            else
+            {
+                stack.push(node);
+                getBinaryOperatorArgs(node);
+                continue;
+            }
+
+            argsFound = 0;
+
+            break;
+        }
+
+        case Lexer::Lexeme::Plus:
+        {
+            if(argsFound > 1)
+            {
+                auto left = valueStack.top(); valueStack.pop();
+                auto right = valueStack.top(); valueStack.pop();
+
+                valueStack.push(std::make_shared<Variable>(Add(left->GetData(), right->GetData())));
+            }
+            else
+            {
+                stack.push(node);
+                getBinaryOperatorArgs(node);
+                continue;
+            }
+
+            argsFound = false;
+
+            break;
+        }
+        
+        default:
+            break;
+        }
+    }
+
+    while(!valueStack.empty())
+    {
+        auto value = valueStack.top(); valueStack.pop();
+        auto it = std::find_if(vars.begin(), vars.end(), [&](const auto& a) { return a.second == value; });
+        std::cout << (it == vars.end() ? "no name" : it->first) << " = " << value->GetData().second << std::endl;
+    }
+}
