@@ -165,7 +165,7 @@ static Lexer::Token Pow(Lexer::Token left, Lexer::Token right)
     switch (left.first)
     {
     case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(std::pow(stof(left.second), stof(right.second))) };
+        return { Lexer::Lexeme::Int, std::to_string(int(std::pow(stof(left.second), stof(right.second)))) };
     case Lexer::Lexeme::Float:
         return { Lexer::Lexeme::Float, std::to_string(std::pow(stof(left.second), stof(right.second))) };
     }

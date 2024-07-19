@@ -17,6 +17,11 @@ void Function::SetArgs(std::vector<std::shared_ptr<Variable>> args, VarMap& vars
         localVariables[name] = var;
 }
 
+int Function::GetArgsCount()
+{
+    return args.size();
+}
+
 VarMap& Function::GetLocalVariables()
 {
     return localVariables;

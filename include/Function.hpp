@@ -16,6 +16,8 @@ public:
 
     void SetArgs(std::vector<std::shared_ptr<Variable>> args, VarMap& vars);
 
+    int GetArgsCount();
+
     VarMap& GetLocalVariables();
     std::shared_ptr<AST::Node> GetBody();
     Lexer::Token Execute();

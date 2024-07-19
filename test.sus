@@ -1,2 +1,12 @@
-m = 1;
-a = (5 * 5) + m;
+func = (first, second)
+{
+    println("I called func!");
+    first ** second;
+}
+
+m = "hello";
+a = "meow " + m;
+
+println(func(5, 2));
+
+println(a);
