@@ -1,7 +1,2 @@
-pow2 = (num)
-{
-    println("hi");
-    return num ** 2;
-}
-
+pow2 = (num) -> num ** 2;
 println("uhhhh " + string(pow2(int(input()))));

@@ -392,7 +392,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
     {
         auto node = stack.top(); stack.pop();
 
-        if((returnValue || breakBlock || continueBlock) && node->expression.first != Lexer::Lexeme::CurlyBraceOpen) continue;
+        if((returnValue || breakBlock || continueBlock) && (node->expression.first != Lexer::Lexeme::CurlyBraceOpen && node->expression.first != Lexer::Lexeme::Arrow)) continue;
 
         if(node->children.empty())
         {
@@ -420,31 +420,51 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
         {
             if(node->children.size() > 0)
             {
-                if(node->expression.second == "return")
+                std::shared_ptr<AST::Node> top = nullptr;
+                if(!waitingForArgs.empty())
+                    top = waitingForArgs.top();
+
+                if(node != top && node->children.size() > 0 && node->expression.second != "else")
                 {
-                    std::shared_ptr<AST::Node> top = nullptr;
-                    if(!waitingForArgs.empty())
-                        top = waitingForArgs.top();
-
-                    if(node == top)
-                    {
-                        returnValue = true;
-                        waitingForArgs.pop();
-                        break;
-                    }
-
                     stack.push(node);
                     stack.push(node->children[0]);
                     waitingForArgs.push(node);
-                                            
                     break;
                 }
+
+                if(node->expression.second == "return")
+                {
+                    returnValue = true;
+                }
+                else if(node->expression.second == "if" || (node->expression.second == "elseif" && !skipElse))
+                {
+                    skipElse = false;
+
+                    if(valueStack.top()->GetData() == Lexer::Token(Lexer::Lexeme::Bool, "true"))
+                    {
+                        skipElse = true;
+                        stack.push(node->children[1]);
+                    }
+
+                    valueStack.pop();
+                }
+                else if(node->expression.second == "else" && !skipElse)
+                {
+                    skipElse = true;
+                    stack.push(node->children[0]);
+                    break;
+                }
+
+                waitingForArgs.pop();
+
+                break;
             }
         }
         case Lexer::Lexeme::Equal:
         {
             if(node->children.size() > 2)
-                if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen)
+                if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen ||
+                   node->children[2]->expression.first == Lexer::Lexeme::Arrow)
                 {
                     AST::NodeList args;
                     std::shared_ptr<AST::Node> body;
@@ -559,13 +579,25 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
         case Lexer::Lexeme::Arrow:
         case Lexer::Lexeme::CurlyBraceOpen:
         {
-            if(valueStack.size() >= waitingForArgs.size() || returnValue)
+            std::shared_ptr<AST::Node> top = nullptr;
+            if(!waitingForArgs.empty())
+                top = waitingForArgs.top();
+
+            if(node == top)
             {
-                //stack.pop();
                 returnValue = false;
                 vars = variables;
+                waitingForArgs.pop();
                 break;
             }
+            
+            waitingForArgs.push(node);
+
+            /*if(valueStack.size() >= waitingForArgs.size() || returnValue)
+            {
+                //stack.pop();
+                
+            }*/
 
             stack.push(node);
 
