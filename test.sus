@@ -1,4 +1,7 @@
-m = string(5);
-println(m);
-a = "this is number: " + 5;
-println(a + m + string(10));
+pow2 = (num)
+{
+    println("hi");
+    return num ** 2;
+}
+
+println("uhhhh " + string(pow2(int(input()))));
