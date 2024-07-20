@@ -4,10 +4,12 @@ AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeL
 {
     if(found.empty() && node->expression.first != Lexer::Lexeme::Comma && node->expression.first != Lexer::Lexeme::None)
         found.push_back(node);
-    for(auto& i : node->children)
-        if(i->expression.first != Lexer::Lexeme::Comma && i->expression.first != Lexer::Lexeme::None)
-            found.push_back(i);
-        else found = GetCommaSeparatedNodes(i, found);
+
+    else if(node->expression.first == Lexer::Lexeme::Comma || node->expression.first == Lexer::Lexeme::None)
+        for(auto& i : node->children)
+            if(i->expression.first != Lexer::Lexeme::Comma && i->expression.first != Lexer::Lexeme::None)
+                found.push_back(i);
+            else found = GetCommaSeparatedNodes(i, found);
 
     return found;
 }
@@ -337,14 +339,13 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
     std::stack<std::shared_ptr<Variable>> valueStack;
 
     stack.push(root);
+    int depth = 1;
 
     static bool skipElse = false;
     static bool breakBlock = false;
     static bool continueBlock = false;
     static bool returnValue = false;
     
-    int argsFound = 0;
-
     auto assign = [&](std::shared_ptr<AST::Node> node, std::shared_ptr<Variable> data)
     {
         auto it = vars.find(node->expression.second);
@@ -361,23 +362,25 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
         if(node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
         {
             stack.push(node->children[1]);
+            depth++;
             stack.push(node->children[0]);
+            depth++;
         }
     };
 
     auto execBinaryOperator = [&](std::shared_ptr<AST::Node> node, std::function<Lexer::Token(Lexer::Token, Lexer::Token)> binaryOperator)
     {
-        if(argsFound > 1)
+        if(valueStack.size() > 1)
         {
             auto right = valueStack.top(); valueStack.pop();
             auto left = valueStack.top(); valueStack.pop();
 
             valueStack.push(std::make_shared<Variable>(binaryOperator(left->GetData(), right->GetData())));
-            argsFound++;
         }
         else
         {
             stack.push(node);
+            depth++;
             getBinaryOperatorArgs(node);
         }
     };
@@ -385,6 +388,10 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
     while(!stack.empty())
     {
         auto node = stack.top(); stack.pop();
+        depth--;
+
+        /*std::cout << "Depth: " << depth << " - ";
+        std::cout << "Node: " << node->expression.second << std::endl;*/
 
         if(node->children.empty())
         {
@@ -397,18 +404,38 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
                     valueStack.push(vars[node->expression.second]);
                 }
                 else valueStack.push(it->second);
-                argsFound++;
+
                 continue;
             }
             if(node->expression.first != Lexer::Lexeme::ReservedWord)
                 valueStack.push(std::make_shared<Variable>(node->expression));
 
-            argsFound++;
             continue;
         }
 
         switch(node->expression.first)
         {
+        case Lexer::Lexeme::ReservedWord:
+        {
+            if(node->children.size() > 0)
+            {
+                if(node->expression.second == "return")
+                {
+                    if(valueStack.size() > 0)
+                    {
+                        returnValue = true;
+                        break;
+                    }
+
+                    stack.push(node);
+                    depth++;
+                    stack.push(node->children[0]);
+                    depth++;
+                                            
+                    break;
+                }
+            }
+        }
         case Lexer::Lexeme::Equal:
         {
             if(node->children.size() > 2)
@@ -429,7 +456,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
                     continue;
                 }
 
-            if(argsFound > 1)
+            if(valueStack.size() > 1)
             {
                 auto value = valueStack.top(); valueStack.pop(); valueStack.pop();
                 valueStack.push(assign(node->children[0], value));
@@ -437,11 +464,10 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
             else
             {
                 stack.push(node);
+                depth++;
                 getBinaryOperatorArgs(node);
                 continue;
             }
-
-            argsFound = 0;
 
             break;
         }
@@ -457,17 +483,21 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
                     break;
                 }
 
-                if(argsFound < it->second.GetArgsCount())
+                if(valueStack.size() - depth < it->second.GetArgsCount())
                 {
                     stack.push(node);
+                    depth++;
                     auto nodes = GetCommaSeparatedNodes(node->children[0]);
                     for(auto& i : nodes)
+                    {
                         stack.push(i);
+                        depth++;
+                    }
                         
                     continue;
                 }
 
-                argsFound = 0;
+                //argsFound = 0;
 
                 std::vector<std::shared_ptr<Variable>> args;
                 for(int i = 0; i < it->second.GetArgsCount(); i++)
@@ -481,7 +511,6 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
                 if(!it->second.GetBody())
                 {
                     valueStack.push(std::make_shared<Variable>(it->second.Execute()));
-                    argsFound++;
                     break;
                 }
                 
@@ -489,6 +518,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
 
                 //stack.push(node);
                 stack.push(it->second.GetBody());
+                depth++;
 
                 vars = it->second.GetLocalVariables();
 
@@ -502,8 +532,6 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
                 for(auto i = c.begin(); i < c.end() && !returnValue; i++)
                     ret = GetReturn(*i, it->second.GetLocalVariables());*/
 
-                returnValue = false;
-
                 //valueStack.push(ret);
                 break;
             }
@@ -515,18 +543,22 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars)
         case Lexer::Lexeme::Arrow:
         case Lexer::Lexeme::CurlyBraceOpen:
         {
-            if(argsFound > 0 || returnValue)
+            if(valueStack.size() > 0 || returnValue)
             {
                 //stack.pop();
+                returnValue = false;
+                vars = variables;
                 break;
             }
 
             stack.push(node);
+            depth++;
 
             for(auto i = node->children.end() - 1; i >= node->children.begin(); i--)
+            {
                 stack.push(*i);
-
-            argsFound = 0;
+                depth++;
+            }
 
             break;
         }

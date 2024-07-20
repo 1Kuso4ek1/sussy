@@ -1,12 +1,4 @@
-func = (first, second)
-{
-    println("I called func!");
-    first ** second;
-}
-
-m = "hello";
-a = "meow " + m;
-
-println(func(5, 2));
-
-println(a);
+m = string(5);
+println(m);
+a = "this is number: " + 5;
+println(a + m + string(10));

@@ -7,4 +7,4 @@ AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeL
 
 std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars);
 
-void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& vars);
+void GetReturnIterative(std::shared_ptr<AST::Node> root, VarMap& globalVars);
