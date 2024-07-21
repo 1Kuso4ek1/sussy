@@ -5,18 +5,18 @@ AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeL
     if(found.empty() && node->expression.first != Lexer::Lexeme::Comma && node->expression.first != Lexer::Lexeme::None)
         found.push_back(node);
 
-    else if(node->expression.first == Lexer::Lexeme::Comma || node->expression.first == Lexer::Lexeme::None)
-        for(auto& i : node->children)
-            if(i->expression.first != Lexer::Lexeme::Comma && i->expression.first != Lexer::Lexeme::None)
-                found.push_back(i);
-            else found = GetCommaSeparatedNodes(i, found);
+    //else if(node->expression.first == Lexer::Lexeme::Comma || node->expression.first == Lexer::Lexeme::None)
+    for(auto& i : node->children)
+        if(i->expression.first != Lexer::Lexeme::Comma && i->expression.first != Lexer::Lexeme::None)
+            found.push_back(i);
+        else found = GetCommaSeparatedNodes(i, found);
 
     return found;
 }
 
 std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector<VarMap>& scopes)
 {
-    auto findVariableInScopes = [&](std::string name) -> std::shared_ptr<Variable>
+    auto findVariableByName = [&](std::string name) -> std::shared_ptr<Variable>
     {
         for(auto i = scopes.rbegin(); i < scopes.rend(); i++)
         {
@@ -28,11 +28,23 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         return nullptr;
     };
 
+    auto findVariableByPointer = [&](std::shared_ptr<Variable> var) -> std::shared_ptr<Variable>
+    {
+        for(auto i = scopes.rbegin(); i < scopes.rend(); i++)
+        {
+            auto it = std::find_if(i->begin(), i->end(), [&](const auto& a) { return *a.second == var; });
+            if(it != i->end())
+                return it->second;
+        }
+
+        return nullptr;
+    };
+
     if(node->children.empty())
     {
         if(node->expression.first == Lexer::Lexeme::Word)
         {
-            auto var = findVariableInScopes(node->expression.second);
+            auto var = findVariableByName(node->expression.second);
             if(!var)
             {
                 scopes.back()[node->expression.second] = std::make_shared<Variable>();
@@ -57,7 +69,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
     auto assign = [&](std::shared_ptr<Variable> data)
     {
-        auto var = findVariableInScopes(node->children[0]->expression.second);
+        auto var = findVariableByName(node->children[0]->expression.second);
         if(var)
         {
             *(var) = data;
@@ -81,6 +93,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             AST::NodeList nodes;
             std::vector<std::shared_ptr<Variable>> args;
 
+            scopes.emplace_back();
+
             if(node->children.size() > 1)
             {
                 nodes = GetCommaSeparatedNodes(node->children[0]);
@@ -90,8 +104,6 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
             if(node->expression.second == "if" || (node->expression.second == "elseif" && !skipElse))
             {
-                scopes.emplace_back();
-
                 skipElse = false;
 
                 auto it = std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); });
@@ -106,13 +118,9 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                         if(returnValue) break;
                     }
                 }
-
-                scopes.pop_back();
             }
             else if(node->expression.second == "else" && !skipElse)
             {
-                scopes.emplace_back();
-
                 skipElse = true;
 
                 for(auto i : node->children[0]->children)
@@ -120,16 +128,12 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     ret = GetReturn(i, scopes);
                     if(returnValue) break;
                 }
-
-                scopes.pop_back();
             }
             else if(node->expression.second == "switch")
             {
-                scopes.emplace_back();
-
                 breakBlock = continueBlock = false;
 
-                auto switchVar = findVariableInScopes(node->children[0]->expression.second);
+                auto switchVar = findVariableByName(node->children[0]->expression.second);
                 
                 for(auto i = node->children[1]->children.begin(); i < node->children[1]->children.end(); i++)
                 {
@@ -146,13 +150,9 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                         }
                     }
                 }
-
-                scopes.pop_back();
             }
             else if(node->expression.second == "while")
             {
-                scopes.emplace_back();
-
                 breakBlock = continueBlock = false;
 
                 while(std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); }) == args.end())
@@ -171,22 +171,18 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     args.clear();
                     args.push_back(GetReturn(node->children[0], scopes));
                 }
-
-                scopes.pop_back();
             }
             else if(node->expression.second == "for")
             {
-                scopes.emplace_back();
-
                 breakBlock = continueBlock = false;
 
-                auto iteratorVar = std::find_if(scopes.back().begin(), scopes.back().end(), [&](const auto& a) { return a.second == args[0]; });
+                auto iteratorVar = findVariableByPointer(args[0]);
                 int start = stoi(args[2]->GetData().second);
                 int end = stoi(args.back()->GetData().second);
 
                 for(int i = start; (start < end ? i < end : i > end); i += (start < end ? 1 : -1))
                 {
-                    *iteratorVar->second = Lexer::Token(Lexer::Lexeme::Int, std::to_string(i));
+                    *iteratorVar = Lexer::Token(Lexer::Lexeme::Int, std::to_string(i));
 
                     for(auto i : node->children[1]->children)
                     {
@@ -199,8 +195,6 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     if(breakBlock || returnValue) break;
                     continueBlock = false;
                 }
-
-                scopes.pop_back();
             }
             else if(node->expression.second == "return")
             {
@@ -208,6 +202,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                 if(node->children.size() > 0)
                     ret = GetReturn(node->children[0], scopes);
             }
+
+            scopes.pop_back();
 
             return ret;
         }
@@ -257,7 +253,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         return std::make_shared<Variable>(node->expression);
     }
 
-    case Lexer::Lexeme::InRange: return assign(rightRet); return leftRet;
+    case Lexer::Lexeme::InRange: assign(rightRet); return leftRet;
     case Lexer::Lexeme::Equal:
     {
         if(node->children.size() > 2)
@@ -413,7 +409,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
         }
     };
 
-    auto findVariableInScopes = [&](std::string name) -> std::shared_ptr<Variable>
+    auto findVariableByName = [&](std::string name) -> std::shared_ptr<Variable>
     {
         for(auto i = scopes.rbegin(); i < scopes.rend(); i++)
         {
@@ -427,7 +423,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
 
     auto assign = [&](std::shared_ptr<AST::Node> node, std::shared_ptr<Variable> data)
     {
-        auto var = findVariableInScopes(node->expression.second);
+        auto var = findVariableByName(node->expression.second);
         if(var)
         {
             *(var) = data;
@@ -446,7 +442,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
         {
             if(node->expression.first == Lexer::Lexeme::Word)
             {
-                auto var = findVariableInScopes(node->expression.second);
+                auto var = findVariableByName(node->expression.second);
                 if(!var)
                 {
                     scopes.back()[node->expression.second] = std::make_shared<Variable>();
