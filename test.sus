@@ -1,1 +1,31 @@
-for(i => 0, 10) -> println(i);
+# JESUS CHRIST, A CALCULATOR!!! #
+
+import "math.sus"
+import "input.sus"
+
+a = inputNumber();
+op = inputOperator();
+
+if(op == '!') -> 
+    println(string(a) + op + " = " + fact(a));
+else
+{
+    b = inputNumber();
+
+    print(string(a) + ' ' + op + ' ' + b + " = ");
+
+    switch(op)
+    {
+        case('+') -> println(a + b);
+        case('-') -> println(a - b);
+        case('*') -> println(a * b);
+        case('/')
+        {
+            if(b == 0) -> println("Error: division by zero.");
+            else -> println(a / b);
+        }
+        case('^') -> println(a ** b);
+
+        default() -> println("Error: unknown operation.");
+    }
+}
