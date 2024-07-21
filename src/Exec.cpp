@@ -476,23 +476,6 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
                     }
 
                     valueStack.pop();
-
-                    /*while(std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); }) == args.end())
-                    {
-                        for(auto i : node->children[1]->children)
-                        {
-                            if(breakBlock || continueBlock) break;
-                            else ret = GetReturn(i, scopes.back());
-
-                            if(returnValue) break;
-                        }
-                        
-                        if(breakBlock || returnValue) break;
-                        continueBlock = false;
-
-                        args.clear();
-                        args.push_back(GetReturn(node->children[0], scopes.back()));
-                    }*/
                 }
 
                 if(node->children.size() > 0)
