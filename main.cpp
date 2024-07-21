@@ -73,5 +73,5 @@ int main(int argc, char** argv)
     std::vector<VarMap> scopes { { } };
 
     for(auto i : ast.GetRootNode()->children)
-        GetReturnIterative(i, scopes);
+        GetReturn(i, scopes);
 }

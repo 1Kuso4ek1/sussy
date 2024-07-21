@@ -14,19 +14,31 @@ AST::NodeList GetCommaSeparatedNodes(std::shared_ptr<AST::Node> node, AST::NodeL
     return found;
 }
 
-std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& vars)
+std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector<VarMap>& scopes)
 {
+    auto findVariableInScopes = [&](std::string name) -> std::shared_ptr<Variable>
+    {
+        for(auto i = scopes.rbegin(); i < scopes.rend(); i++)
+        {
+            auto it = i->find(name);
+            if(it != i->end())
+                return it->second;
+        }
+
+        return nullptr;
+    };
+
     if(node->children.empty())
     {
         if(node->expression.first == Lexer::Lexeme::Word)
         {
-            auto it = vars.find(node->expression.second);
-            if(it == vars.end())
+            auto var = findVariableInScopes(node->expression.second);
+            if(!var)
             {
-                vars[node->expression.second] = std::make_shared<Variable>();
-                return vars[node->expression.second];
+                scopes.back()[node->expression.second] = std::make_shared<Variable>();
+                return scopes.back()[node->expression.second];
             }
-            else return it->second;
+            else return var;
         }
         if(node->expression.first != Lexer::Lexeme::ReservedWord)
             return std::make_shared<Variable>(node->expression);
@@ -45,19 +57,19 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
     auto assign = [&](std::shared_ptr<Variable> data)
     {
-        auto it = vars.find(node->children[0]->expression.second);
-        if(it != vars.end())
+        auto var = findVariableInScopes(node->children[0]->expression.second);
+        if(var)
         {
-            *(it->second) = data;
-            return it->second;
+            *(var) = data;
+            return var;
         }
         return data;
     };
 
     if(node->children.size() == 2 && node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
     {
-        leftRet = GetReturn(node->children[0], vars);
-        rightRet = GetReturn(node->children[1], vars);
+        leftRet = GetReturn(node->children[0], scopes);
+        rightRet = GetReturn(node->children[1], scopes);
     }
 
     switch(node->expression.first)
@@ -73,11 +85,13 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
             {
                 nodes = GetCommaSeparatedNodes(node->children[0]);
                 for(auto& i : nodes)
-                    args.push_back(GetReturn(i, vars));
+                    args.push_back(GetReturn(i, scopes));
             }
 
             if(node->expression.second == "if" || (node->expression.second == "elseif" && !skipElse))
             {
+                scopes.emplace_back();
+
                 skipElse = false;
 
                 auto it = std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); });
@@ -88,45 +102,57 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
                     for(auto i : node->children[1]->children)
                     {
-                        ret = GetReturn(i, vars);
+                        ret = GetReturn(i, scopes);
                         if(returnValue) break;
                     }
                 }
+
+                scopes.pop_back();
             }
             else if(node->expression.second == "else" && !skipElse)
             {
+                scopes.emplace_back();
+
                 skipElse = true;
 
                 for(auto i : node->children[0]->children)
                 {
-                    ret = GetReturn(i, vars);
+                    ret = GetReturn(i, scopes);
                     if(returnValue) break;
                 }
+
+                scopes.pop_back();
             }
             else if(node->expression.second == "switch")
             {
+                scopes.emplace_back();
+
                 breakBlock = continueBlock = false;
 
-                auto switchVar = vars.find(node->children[0]->expression.second);
+                auto switchVar = findVariableInScopes(node->children[0]->expression.second);
                 
                 for(auto i = node->children[1]->children.begin(); i < node->children[1]->children.end(); i++)
                 {
                     if((*i)->expression.first == Lexer::Lexeme::ReservedWord && ((*i)->expression.second == "case" || (*i)->expression.second == "default"))
                     {
-                        if(IsEqual(switchVar->second->GetData(), GetReturn((*i)->children[0], vars)->GetData()).second == "true" || (*i)->expression.second == "default")
+                        if(IsEqual(switchVar->GetData(), GetReturn((*i)->children[0], scopes)->GetData()).second == "true" || (*i)->expression.second == "default")
                         {
                             for(auto j : (*i)->children[1]->children)
                             {
-                                ret = GetReturn(j, vars);
+                                ret = GetReturn(j, scopes);
                                 if(returnValue) break;
                             }
                             break;
                         }
                     }
                 }
+
+                scopes.pop_back();
             }
             else if(node->expression.second == "while")
             {
+                scopes.emplace_back();
+
                 breakBlock = continueBlock = false;
 
                 while(std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); }) == args.end())
@@ -134,7 +160,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
                     for(auto i : node->children[1]->children)
                     {
                         if(breakBlock || continueBlock) break;
-                        else ret = GetReturn(i, vars);
+                        else ret = GetReturn(i, scopes);
 
                         if(returnValue) break;
                     }
@@ -143,14 +169,18 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
                     continueBlock = false;
 
                     args.clear();
-                    args.push_back(GetReturn(node->children[0], vars));
+                    args.push_back(GetReturn(node->children[0], scopes));
                 }
+
+                scopes.pop_back();
             }
             else if(node->expression.second == "for")
             {
+                scopes.emplace_back();
+
                 breakBlock = continueBlock = false;
 
-                auto iteratorVar = std::find_if(vars.begin(), vars.end(), [&](const auto& a) { return a.second == args[0]; });
+                auto iteratorVar = std::find_if(scopes.back().begin(), scopes.back().end(), [&](const auto& a) { return a.second == args[0]; });
                 int start = stoi(args[2]->GetData().second);
                 int end = stoi(args.back()->GetData().second);
 
@@ -161,7 +191,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
                     for(auto i : node->children[1]->children)
                     {
                         if(breakBlock || continueBlock) break;
-                        else ret = GetReturn(i, vars);
+                        else ret = GetReturn(i, scopes);
 
                         if(returnValue) break;
                     }
@@ -170,13 +200,13 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
                     continueBlock = false;
                 }
 
-                vars.erase(iteratorVar);
+                scopes.pop_back();
             }
             else if(node->expression.second == "return")
             {
                 returnValue = true;
                 if(node->children.size() > 0)
-                    ret = GetReturn(node->children[0], vars);
+                    ret = GetReturn(node->children[0], scopes);
             }
 
             return ret;
@@ -201,19 +231,23 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
             auto nodes = GetCommaSeparatedNodes(node->children[0]);
             std::vector<std::shared_ptr<Variable>> args;
             for(auto& i : nodes)
-                args.push_back(GetReturn(i, vars));
+                args.push_back(GetReturn(i, scopes));
 
-            it->second.SetArgs(args, vars);
+            it->second.SetArgs(args, scopes.back());
 
             if(!it->second.GetBody())
                 return std::make_shared<Variable>(it->second.Execute());
 
             returnValue = false;
 
+            scopes.push_back(it->second.GetLocalVariables());
+
             std::shared_ptr<Variable> ret;
             auto c = it->second.GetBody()->children;
             for(auto i = c.begin(); i < c.end() && !returnValue; i++)
-                ret = GetReturn(*i, it->second.GetLocalVariables());
+                ret = GetReturn(*i, scopes);
+
+            scopes.pop_back();
 
             returnValue = false;
 
@@ -236,9 +270,9 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
                 
                 body = node->children[2];
 
-                auto it = vars.find(node->children[0]->expression.second);
-                if(it != vars.end())
-                    vars.erase(it);
+                auto it = scopes.back().find(node->children[0]->expression.second);
+                if(it != scopes.back().end())
+                    scopes.back().erase(it);
                 functions[node->children[0]->expression.second] = Function(args, body);
 
                 return nullptr;
@@ -246,12 +280,12 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
         
         if(node->children[0]->expression.first == Lexer::Lexeme::Colon)
         {
-            auto var = vars.find(node->children[0]->children[0]->expression.second);
-            if(var != vars.end())
+            auto var = scopes.back().find(node->children[0]->children[0]->expression.second);
+            if(var != scopes.back().end())
                 if(var->second->GetType() == Variable::VariableType::Array)
                 {
-                    auto value = GetReturn(node->children[1], vars);
-                    auto index = GetReturn(node->children[0]->children[1], vars);
+                    auto value = GetReturn(node->children[1], scopes);
+                    auto index = GetReturn(node->children[0]->children[1], scopes);
                     auto element = std::make_shared<Variable>(value->GetData());
                     var->second->SetElement(stoi(index->GetData().second), element);
 
@@ -263,9 +297,9 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
         else if(node->children[1]->expression.first == Lexer::Lexeme::Colon &&
                 node->children[1]->children[0]->expression.first == Lexer::Lexeme::Int)
         {
-            auto array = std::make_shared<Variable>(std::make_pair(Lexer::Lexeme::Word, node->children[0]->expression.second), Variable::VariableType::Array, stoi(GetReturn(node->children[1]->children[0], vars)->GetData().second));
-            array->Fill(GetReturn(node->children[1]->children[1], vars)->GetData());
-            vars[node->children[0]->expression.second] = array;
+            auto array = std::make_shared<Variable>(std::make_pair(Lexer::Lexeme::Word, node->children[0]->expression.second), Variable::VariableType::Array, stoi(GetReturn(node->children[1]->children[0], scopes)->GetData().second));
+            array->Fill(GetReturn(node->children[1]->children[1], scopes)->GetData());
+            scopes.back()[node->children[0]->expression.second] = array;
 
             return array->GetElement(0);
         }
@@ -276,10 +310,10 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
             nodes = GetCommaSeparatedNodes(node->children[1]);
             std::vector<std::shared_ptr<Variable>> args;
             for(auto& i : nodes)
-                args.push_back(GetReturn(i, vars));
+                args.push_back(GetReturn(i, scopes));
 
-            auto var = vars.find(node->children[0]->expression.second);
-            if(var != vars.end())
+            auto var = scopes.back().find(node->children[0]->expression.second);
+            if(var != scopes.back().end())
                 if(var->second->GetType() == Variable::VariableType::Array)
                 {
                     for(int i = 0; i < args.size(); i++)
@@ -295,11 +329,11 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, VarMap& var
 
     case Lexer::Lexeme::Colon:
     {
-        auto it = vars.find(node->children[0]->expression.second);
-        if(it != vars.end())
+        auto it = scopes.back().find(node->children[0]->expression.second);
+        if(it != scopes.back().end())
         {
             if(it->second->GetType() == Variable::VariableType::Array)
-                return it->second->GetElement(stoi(GetReturn(node->children[1], vars)->GetData().second));
+                return it->second->GetElement(stoi(GetReturn(node->children[1], scopes)->GetData().second));
         }
 
         return std::make_shared<Variable>(Index(leftRet->GetData(), rightRet->GetData()));

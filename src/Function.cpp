@@ -13,8 +13,6 @@ void Function::SetArgs(std::vector<std::shared_ptr<Variable>> args, VarMap& vars
         /*else if(this->args[i]->expression.first != Lexer::Lexeme::Word)
             localVariables[this->args[i]->children[0]->expression.second] = std::make_shared<Variable>(GetReturn(this->args[i], vars));*/
     }
-    for(auto [name, var] : vars) // Useless in iterative variant
-        localVariables[name] = var;
 }
 
 int Function::GetArgsCount()
