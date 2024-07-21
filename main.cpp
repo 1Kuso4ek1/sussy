@@ -70,6 +70,8 @@ int main(int argc, char** argv)
         if(std::string(argv[2]) == "--ast")
             PrintAST(ast.GetRootNode());
 
+    std::vector<VarMap> scopes { { } };
+
     for(auto i : ast.GetRootNode()->children)
-        GetReturnIterative(i, variables);
+        GetReturnIterative(i, scopes);
 }

@@ -1,2 +1,2 @@
-pow2 = (num) -> num ** 2;
-println("uhhhh " + string(pow2(int(input()))));
+i = 0;
+while(i < 10000) -> i = i + 1;
