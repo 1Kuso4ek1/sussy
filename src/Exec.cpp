@@ -276,14 +276,14 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         
         if(node->children[0]->expression.first == Lexer::Lexeme::Colon)
         {
-            auto var = scopes.back().find(node->children[0]->children[0]->expression.second);
-            if(var != scopes.back().end())
-                if(var->second->GetType() == Variable::VariableType::Array)
+            auto var = findVariableByName(node->children[0]->children[0]->expression.second);
+            if(var)
+                if(var->GetType() == Variable::VariableType::Array)
                 {
                     auto value = GetReturn(node->children[1], scopes);
                     auto index = GetReturn(node->children[0]->children[1], scopes);
                     auto element = std::make_shared<Variable>(value->GetData());
-                    var->second->SetElement(stoi(index->GetData().second), element);
+                    var->SetElement(stoi(index->GetData().second), element);
 
                     return element;
                 }
@@ -308,13 +308,13 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             for(auto& i : nodes)
                 args.push_back(GetReturn(i, scopes));
 
-            auto var = scopes.back().find(node->children[0]->expression.second);
-            if(var != scopes.back().end())
-                if(var->second->GetType() == Variable::VariableType::Array)
+            auto var = findVariableByName(node->children[0]->expression.second);
+            if(var)
+                if(var->GetType() == Variable::VariableType::Array)
                 {
                     for(int i = 0; i < args.size(); i++)
-                        var->second->SetElement(i, args[i]);
-                    return var->second->GetElement(args.size() - 1);
+                        var->SetElement(i, args[i]);
+                    return var->GetElement(args.size() - 1);
                 }
 
             return std::make_shared<Variable>(node->expression);
@@ -325,11 +325,11 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
     case Lexer::Lexeme::Colon:
     {
-        auto it = scopes.back().find(node->children[0]->expression.second);
-        if(it != scopes.back().end())
+        auto var = findVariableByName(node->children[0]->expression.second);
+        if(var)
         {
-            if(it->second->GetType() == Variable::VariableType::Array)
-                return it->second->GetElement(stoi(GetReturn(node->children[1], scopes)->GetData().second));
+            if(var->GetType() == Variable::VariableType::Array)
+                return var->GetElement(stoi(GetReturn(node->children[1], scopes)->GetData().second));
         }
 
         return std::make_shared<Variable>(Index(leftRet->GetData(), rightRet->GetData()));
@@ -363,6 +363,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     return std::make_shared<Variable>(Lexer::Token(Lexer::Lexeme::None, ""));
 }
 
+// Twice as SLOW
 void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& scopes)
 {
     std::stack<std::shared_ptr<AST::Node>> stack;
