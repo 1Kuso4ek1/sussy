@@ -340,6 +340,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     case Lexer::Lexeme::MultiplyAssign: return assign(std::make_shared<Variable>(Multiply(leftRet->GetData(), rightRet->GetData())));
     case Lexer::Lexeme::DivideAssign: return assign(std::make_shared<Variable>(Divide(leftRet->GetData(), rightRet->GetData())));
 
+    case Lexer::Lexeme::IsNotEqual: return std::make_shared<Variable>(Not(IsEqual(leftRet->GetData(), rightRet->GetData())));
     case Lexer::Lexeme::IsEqual: return std::make_shared<Variable>(IsEqual(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::IsLess: return std::make_shared<Variable>(IsLess(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::IsGreater: return std::make_shared<Variable>(IsGreater(leftRet->GetData(), rightRet->GetData()));

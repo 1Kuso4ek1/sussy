@@ -112,6 +112,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::IsLessOrEqual:
         case Lexer::Lexeme::IsGreaterOrEqual:
         case Lexer::Lexeme::IsEqual:
+        case Lexer::Lexeme::IsNotEqual:
         case Lexer::Lexeme::Not:
         case Lexer::Lexeme::And:
         case Lexer::Lexeme::Or:
@@ -187,6 +188,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::IsLessOrEqual: return 4;
     case Lexer::Lexeme::IsGreaterOrEqual: return 4;
     case Lexer::Lexeme::IsEqual: return 4;
+    case Lexer::Lexeme::IsNotEqual: return 4;
     case Lexer::Lexeme::Not: return 7;
     case Lexer::Lexeme::And: return 1;
     case Lexer::Lexeme::Or: return 1;

@@ -20,6 +20,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::ReservedWord: std::cout << "{ Lexeme::ReservedWord, "; break;
     case Lexer::Lexeme::Word: std::cout << "{ Lexeme::Word, "; break;
     case Lexer::Lexeme::IsEqual: std::cout << "{ Lexeme::IsEqual, "; break;
+    case Lexer::Lexeme::IsNotEqual: std::cout << "{ Lexeme::IsNotEqual, "; break;
     case Lexer::Lexeme::IsLess: std::cout << "{ Lexeme::IsLess, "; break;
     case Lexer::Lexeme::IsGreater: std::cout << "{ Lexeme::IsGreater, "; break;
     case Lexer::Lexeme::IsLessOrEqual: std::cout << "{ Lexeme::IsLessOrEqual, "; break;

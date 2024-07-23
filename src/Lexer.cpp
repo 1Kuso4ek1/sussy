@@ -103,6 +103,12 @@ void Lexer::Tokenize(const std::string& input)
                 tokens.back().second = ">=";
                 return;
             }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::Not)
+            {
+                tokens.back().first = Lexeme::IsNotEqual;
+                tokens.back().second = "!=";
+                return;
+            }
             else if(l == Lexeme::Multiply && tokens.back().first == Lexeme::Multiply)
             {
                 tokens.back().first = Lexeme::Pow;

@@ -22,7 +22,7 @@ public:
         
         AddAssign, SubtractAssign, MultiplyAssign, DivideAssign,
         
-        IsEqual, IsLess, IsGreater, IsLessOrEqual, IsGreaterOrEqual,
+        IsEqual, IsLess, IsGreater, IsLessOrEqual, IsGreaterOrEqual, IsNotEqual,
 
         BitwiseAnd, BitwiseOr, And, Or, LeftShift, RightShift, Not
     };
