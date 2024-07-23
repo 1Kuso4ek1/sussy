@@ -24,6 +24,7 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::IsGreater: std::cout << "{ Lexeme::IsGreater, "; break;
     case Lexer::Lexeme::IsLessOrEqual: std::cout << "{ Lexeme::IsLessOrEqual, "; break;
     case Lexer::Lexeme::IsGreaterOrEqual: std::cout << "{ Lexeme::IsGreaterOrEqual, "; break;
+    case Lexer::Lexeme::Not: std::cout << "{ Lexeme::Not, "; break;
     case Lexer::Lexeme::And: std::cout << "{ Lexeme::And, "; break;
     case Lexer::Lexeme::Or: std::cout << "{ Lexeme::Or, "; break;
     case Lexer::Lexeme::BitwiseAnd: std::cout << "{ Lexeme::BitwiseAnd, "; break;
@@ -34,6 +35,9 @@ void PrintAST(std::shared_ptr<AST::Node> node, int depth = 0)
     case Lexer::Lexeme::Equal: std::cout << "{ Lexeme::Equal, "; break;
     case Lexer::Lexeme::InRange: std::cout << "{ Lexeme::InRange, "; break;
     case Lexer::Lexeme::Colon: std::cout << "{ Lexeme::Colon, "; break;
+    case Lexer::Lexeme::UnaryMinus: std::cout << "{ Lexeme::UnaryMinus, "; break;
+    case Lexer::Lexeme::Decrement: std::cout << "{ Lexeme::Decrement, "; break;
+    case Lexer::Lexeme::Increment: std::cout << "{ Lexeme::Increment, "; break;
     case Lexer::Lexeme::Plus: std::cout << "{ Lexeme::Plus, "; break;
     case Lexer::Lexeme::Minus: std::cout << "{ Lexeme::Minus, "; break;
     case Lexer::Lexeme::Multiply: std::cout << "{ Lexeme::Multiply, "; break;

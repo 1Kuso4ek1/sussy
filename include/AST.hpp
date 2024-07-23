@@ -24,6 +24,7 @@ public:
 
 private:
     int GetOperatorPriority(Lexer::Lexeme lexeme);
+    bool IsUnary(Lexer::Lexeme lexeme);
 
     std::shared_ptr<Node> root;
 };

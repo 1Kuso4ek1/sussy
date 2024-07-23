@@ -13,7 +13,7 @@ static Lexer::Token Index(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token IsLess(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Bool, stoi(left.second) < stoi(right.second) ? "true" : "false" };
@@ -28,7 +28,7 @@ static Lexer::Token IsLess(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token IsGreater(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Bool, stoi(left.second) > stoi(right.second) ? "true" : "false" };
@@ -43,7 +43,7 @@ static Lexer::Token IsGreater(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token IsLessOrEqual(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Bool, stoi(left.second) <= stoi(right.second) ? "true" : "false" };
@@ -58,7 +58,7 @@ static Lexer::Token IsLessOrEqual(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token IsGreaterOrEqual(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Bool, stoi(left.second) >= stoi(right.second) ? "true" : "false" };
@@ -74,6 +74,11 @@ static Lexer::Token IsGreaterOrEqual(Lexer::Token left, Lexer::Token right)
 static Lexer::Token IsEqual(Lexer::Token left, Lexer::Token right)
 {
     return { Lexer::Lexeme::Bool, left.second == right.second ? "true" : "false" };
+}
+
+static Lexer::Token Not(Lexer::Token value)
+{
+    return { Lexer::Lexeme::Bool, value.second == "true" ? "false" : "true" };
 }
 
 static Lexer::Token And(Lexer::Token left, Lexer::Token right)
@@ -106,9 +111,19 @@ static Lexer::Token RightShift(Lexer::Token left, Lexer::Token right)
     return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) >> stoi(right.second)) };
 }
 
+static Lexer::Token Decrement(Lexer::Token value)
+{
+    return { Lexer::Lexeme::Int, std::to_string(stoi(value.second) - 1) };
+}
+
+static Lexer::Token Increment(Lexer::Token value)
+{
+    return { Lexer::Lexeme::Int, std::to_string(stoi(value.second) + 1) };
+}
+
 static Lexer::Token Add(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) + stoi(right.second)) };
@@ -123,7 +138,7 @@ static Lexer::Token Add(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token Subtract(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) - stoi(right.second)) };
@@ -134,9 +149,22 @@ static Lexer::Token Subtract(Lexer::Token left, Lexer::Token right)
     return { Lexer::Lexeme::None, "" };
 }
 
+static Lexer::Token Negate(Lexer::Token number)
+{
+    switch(number.first)
+    {
+    case Lexer::Lexeme::Int:
+        return { Lexer::Lexeme::Int, std::to_string(-stoi(number.second)) };
+    case Lexer::Lexeme::Float:
+        return { Lexer::Lexeme::Float, std::to_string(-stof(number.second)) };
+    }
+
+    return { Lexer::Lexeme::None, "" };
+}
+
 static Lexer::Token Multiply(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) * stoi(right.second)) };
@@ -149,7 +177,7 @@ static Lexer::Token Multiply(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token Divide(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) / stoi(right.second)) };
@@ -162,7 +190,7 @@ static Lexer::Token Divide(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token Pow(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Int, std::to_string(int(std::pow(stof(left.second), stof(right.second)))) };
@@ -175,7 +203,7 @@ static Lexer::Token Pow(Lexer::Token left, Lexer::Token right)
 
 static Lexer::Token Mod(Lexer::Token left, Lexer::Token right)
 {
-    switch (left.first)
+    switch(left.first)
     {
     case Lexer::Lexeme::Int:
         return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) % stoi(right.second)) };

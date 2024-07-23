@@ -68,7 +68,24 @@ void Lexer::Tokenize(const std::string& input)
         if(!openedQuote)
         {
             addAndClear();
-            if(l == Lexeme::Equal && tokens.back().first == Lexeme::Equal)
+            if(l == Lexeme::Minus && tokens.back().first != Lexeme::Word &&
+                                     tokens.back().first != Lexeme::Int &&
+                                     tokens.back().first != Lexeme::Float &&
+                                     tokens.back().first != Lexeme::BraceClose)
+                l = Lexeme::UnaryMinus;
+            if(l == Lexeme::Minus && tokens.back().first == Lexeme::Minus)
+            {
+                tokens.back().first = Lexeme::Decrement;
+                tokens.back().second = "--";
+                return;
+            }
+            else if(l == Lexeme::Plus && tokens.back().first == Lexeme::Plus)
+            {
+                tokens.back().first = Lexeme::Increment;
+                tokens.back().second = "++";
+                return;
+            }
+            else if(l == Lexeme::Equal && tokens.back().first == Lexeme::Equal)
             {
                 tokens.back().first = Lexeme::IsEqual;
                 tokens.back().second = "==";
@@ -191,6 +208,7 @@ void Lexer::Tokenize(const std::string& input)
         case '|': singleChar(Lexeme::BitwiseOr, i); break;
         case ':': singleChar(Lexeme::Colon, i); break;
         case '%': singleChar(Lexeme::Mod, i); break;
+        case '!': singleChar(Lexeme::Not, i); break;
         case '('...')': singleChar(i == '(' ? Lexeme::BraceOpen : Lexeme::BraceClose, i); break;
 
         case '#': openedComment = !openedComment; break;

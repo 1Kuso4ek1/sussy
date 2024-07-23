@@ -345,6 +345,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     case Lexer::Lexeme::IsGreater: return std::make_shared<Variable>(IsGreater(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::IsLessOrEqual: return std::make_shared<Variable>(IsLessOrEqual(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::IsGreaterOrEqual: return std::make_shared<Variable>(IsGreaterOrEqual(leftRet->GetData(), rightRet->GetData()));
+
+    case Lexer::Lexeme::Not: return std::make_shared<Variable>(Not(GetReturn(node->children[0], scopes)->GetData()));
     case Lexer::Lexeme::And: return std::make_shared<Variable>(And(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::Or: return std::make_shared<Variable>(Or(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::BitwiseAnd: return std::make_shared<Variable>(BitwiseAnd(leftRet->GetData(), rightRet->GetData()));
@@ -352,7 +354,11 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     case Lexer::Lexeme::LeftShift: return std::make_shared<Variable>(LeftShift(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::RightShift: return std::make_shared<Variable>(RightShift(leftRet->GetData(), rightRet->GetData()));
 
+    case Lexer::Lexeme::Decrement: return assign(std::make_shared<Variable>(Decrement(GetReturn(node->children[0], scopes)->GetData())));
+    case Lexer::Lexeme::Increment: return assign(std::make_shared<Variable>(Increment(GetReturn(node->children[0], scopes)->GetData())));
+
     case Lexer::Lexeme::Plus: return std::make_shared<Variable>(Add(leftRet->GetData(), rightRet->GetData()));
+    case Lexer::Lexeme::UnaryMinus: return std::make_shared<Variable>(Negate(GetReturn(node->children[0], scopes)->GetData()));
     case Lexer::Lexeme::Minus: return std::make_shared<Variable>(Subtract(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::Multiply: return std::make_shared<Variable>(Multiply(leftRet->GetData(), rightRet->GetData()));
     case Lexer::Lexeme::Divide: return std::make_shared<Variable>(Divide(leftRet->GetData(), rightRet->GetData()));

@@ -5,7 +5,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
     root = std::make_shared<Node>(std::make_pair(Lexer::Lexeme::None, "root"));
 
     std::stack<std::shared_ptr<Node>> values, operators, curlyBraces;
-    std::shared_ptr<Node> bottomOperator;
+    //std::shared_ptr<Node> bottomOperator;
 
     auto addUnaryChild = [&]()
     {
@@ -19,7 +19,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
     
     auto addChild = [&]()
     {
-        if(values.size() < 2)
+        if(values.size() < 2 || IsUnary(operators.top()->expression.first))
         {
             addUnaryChild();
             return;
@@ -53,8 +53,8 @@ AST::AST(std::vector<Lexer::Token>& tokens)
 
     for(auto i = tokens.begin(); i < tokens.end(); i++)
     {
-        if(operators.size() == 1)
-            bottomOperator = operators.top();
+        /*if(operators.size() == 1)
+            bottomOperator = operators.top();*/
             
         switch(i->first)
         {
@@ -99,8 +99,6 @@ AST::AST(std::vector<Lexer::Token>& tokens)
             break;
         }
 
-        case Lexer::Lexeme::Minus:
-        case Lexer::Lexeme::Plus:
         case Lexer::Lexeme::Pow:
         case Lexer::Lexeme::Mod:
         case Lexer::Lexeme::AddAssign:
@@ -114,6 +112,7 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::IsLessOrEqual:
         case Lexer::Lexeme::IsGreaterOrEqual:
         case Lexer::Lexeme::IsEqual:
+        case Lexer::Lexeme::Not:
         case Lexer::Lexeme::And:
         case Lexer::Lexeme::Or:
         case Lexer::Lexeme::BitwiseAnd:
@@ -121,6 +120,11 @@ AST::AST(std::vector<Lexer::Token>& tokens)
         case Lexer::Lexeme::LeftShift:
         case Lexer::Lexeme::RightShift:
         case Lexer::Lexeme::Equal:
+        case Lexer::Lexeme::UnaryMinus:
+        case Lexer::Lexeme::Decrement:
+        case Lexer::Lexeme::Increment:
+        case Lexer::Lexeme::Minus:
+        case Lexer::Lexeme::Plus:
         case Lexer::Lexeme::Multiply:
         case Lexer::Lexeme::Divide:
         case Lexer::Lexeme::InRange:
@@ -183,6 +187,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::IsLessOrEqual: return 4;
     case Lexer::Lexeme::IsGreaterOrEqual: return 4;
     case Lexer::Lexeme::IsEqual: return 4;
+    case Lexer::Lexeme::Not: return 7;
     case Lexer::Lexeme::And: return 1;
     case Lexer::Lexeme::Or: return 1;
     case Lexer::Lexeme::BitwiseAnd: return 4;
@@ -193,8 +198,11 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::InRange: return 1;
     case Lexer::Lexeme::Colon: return 6;
     case Lexer::Lexeme::Equal: return 2;
-    case Lexer::Lexeme::Plus: return 4;
+    case Lexer::Lexeme::UnaryMinus: return 7;
+    case Lexer::Lexeme::Decrement: return 8;
+    case Lexer::Lexeme::Increment: return 8;
     case Lexer::Lexeme::Minus: return 4;
+    case Lexer::Lexeme::Plus: return 4;
     case Lexer::Lexeme::Multiply: return 5;
     case Lexer::Lexeme::Divide: return 5;
     case Lexer::Lexeme::Pow: return 6;
@@ -204,5 +212,18 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     case Lexer::Lexeme::DivideAssign: return 2;
     
     default: return 0;
+    }
+}
+
+bool AST::IsUnary(Lexer::Lexeme lexeme)
+{
+    switch(lexeme)
+    {
+    case Lexer::Lexeme::Not:
+    case Lexer::Lexeme::Decrement:
+    case Lexer::Lexeme::Increment:
+    case Lexer::Lexeme::UnaryMinus: return true;
+
+    default: return false;
     }
 }

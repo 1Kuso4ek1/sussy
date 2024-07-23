@@ -18,13 +18,13 @@ public:
         
         BraceOpen, BraceClose, CurlyBraceOpen, CurlyBraceClose, Arrow, Dot, Comma, Semicolon, Quote,
         
-        Equal, Plus, Minus, Multiply, Divide, Pow, Mod, InRange, Colon,
+        Increment, Decrement, Equal, Minus, Plus, UnaryMinus, Multiply, Divide, Pow, Mod, InRange, Colon,
         
         AddAssign, SubtractAssign, MultiplyAssign, DivideAssign,
         
         IsEqual, IsLess, IsGreater, IsLessOrEqual, IsGreaterOrEqual,
 
-        BitwiseAnd, BitwiseOr, And, Or, LeftShift, RightShift
+        BitwiseAnd, BitwiseOr, And, Or, LeftShift, RightShift, Not
     };
     
     using Token = std::pair<Lexer::Lexeme, std::string>;
