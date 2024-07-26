@@ -1,11 +1,11 @@
 inputNumber = ()
 {
     print("Enter a number: ");
-    int(input());
+    return int(input());
 }
 
 inputOperator = ()
 {
     print("Enter an operator (+-*/!^): ");
-    input();
+    return input();
 }

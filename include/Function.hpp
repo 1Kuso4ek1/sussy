@@ -5,13 +5,25 @@
 #include "AST.hpp"
 #include "Variable.hpp"
 
+static std::shared_ptr<Variable> CallFuncForDiffTypes(Variable::VariableType type, std::vector<std::function<std::shared_ptr<Variable>(VarMap&)>> cases, VarMap& v)
+{
+    switch(type)
+    {
+    case Variable::VariableType::Int: return cases[0](v);
+    case Variable::VariableType::Float: return cases[1](v);
+    case Variable::VariableType::String: return cases[2](v);
+    case Variable::VariableType::Bool: return cases[3](v);
+    default: return nullptr;
+    }
+}
+
 class Function
 {
 public:
     Function() {}
     Function(AST::NodeList args, std::shared_ptr<AST::Node> body)
             : args(args), body(body) {}
-    Function(AST::NodeList args, std::function<Lexer::Token(VarMap)> cppbody)
+    Function(AST::NodeList args, std::function<std::shared_ptr<Variable>(VarMap&)> cppbody)
             : args(args), cppbody(cppbody) {}
 
     void SetArgs(std::vector<std::shared_ptr<Variable>> args, VarMap& vars);
@@ -20,14 +32,14 @@ public:
 
     VarMap& GetLocalVariables();
     std::shared_ptr<AST::Node> GetBody();
-    Lexer::Token Execute();
+    std::shared_ptr<Variable> Execute();
 
 private:
     VarMap localVariables;
 
     std::vector<std::shared_ptr<AST::Node>> args;
     std::shared_ptr<AST::Node> body;
-    std::function<Lexer::Token(VarMap)> cppbody;
+    std::function<std::shared_ptr<Variable>(VarMap&)> cppbody;
 };
 
 using FunctionMap = std::unordered_map<std::string, Function>;
@@ -35,16 +47,69 @@ using FunctionMap = std::unordered_map<std::string, Function>;
 static FunctionMap functions = 
 {
     { "print", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                        [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second; return { Lexer::Lexeme::None, "" }; }) },
+                        [](VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            return CallFuncForDiffTypes(v["value"]->GetType(),
+                            {
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << std::any_cast<int>(v["value"]->GetData()); return nullptr; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << std::any_cast<float>(v["value"]->GetData()); return nullptr; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << std::any_cast<std::string>(v["value"]->GetData()); return nullptr; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << (std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false"); return nullptr; }
+                            }, v);
+                        })},
+
     { "println", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { std::cout << v["value"]->GetData().second << std::endl; return { Lexer::Lexeme::None, "" }; }) },
-    { "input", Function({ }, [](VarMap v) -> Lexer::Token { std::string ret; std::cin >> ret; return { Lexer::Lexeme::String, ret }; }) },
+                        [](VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            return CallFuncForDiffTypes(v["value"]->GetType(),
+                            {
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << std::any_cast<int>(v["value"]->GetData()) << std::endl; return nullptr; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << std::any_cast<float>(v["value"]->GetData()) << std::endl; return nullptr; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << std::any_cast<std::string>(v["value"]->GetData()) << std::endl; return nullptr; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { std::cout << (std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false") << std::endl; return nullptr; }
+                            }, v);
+                        })},
+
+    { "input", Function({ }, [](VarMap& v) -> std::shared_ptr<Variable> { std::string ret; std::cin >> ret; return std::make_shared<Variable>(Lexer::Token(Lexer::Lexeme::String, ret)); }) },
     { "int", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Int, v["value"]->GetData().second }; }) },
+                        [](VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            return CallFuncForDiffTypes(v["value"]->GetType(),
+                            {
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return v["value"]; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)std::any_cast<float>(v["value"]->GetData()), Variable::VariableType::Int); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(std::stoi(std::any_cast<std::string>(v["value"]->GetData())), Variable::VariableType::Int); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)std::any_cast<bool>(v["value"]->GetData()), Variable::VariableType::Int); }
+                            }, v);
+                        }) },
+
     { "float", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) },
+                        [](VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            return CallFuncForDiffTypes(v["value"]->GetType(),
+                            {
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((float)std::any_cast<int>(v["value"]->GetData()), Variable::VariableType::Float); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return v["value"]; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(std::stof(std::any_cast<std::string>(v["value"]->GetData())), Variable::VariableType::Float); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((float)std::any_cast<bool>(v["value"]->GetData()), Variable::VariableType::Float); }
+                            }, v);
+                        }) },
+
     { "string", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::String, v["value"]->GetData().second }; }) },
+                        [](VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            return CallFuncForDiffTypes(v["value"]->GetType(),
+                            {
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(std::to_string(std::any_cast<int>(v["value"]->GetData())), Variable::VariableType::String); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(std::to_string(std::any_cast<float>(v["value"]->GetData())), Variable::VariableType::String); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return v["value"]; },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(std::string(std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false"), Variable::VariableType::String); }
+                            }, v);
+                        }) },
+    /*{ "float", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                          [](VarMap& v) -> std::shared_ptr<Variable> { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) },
+    { "string", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                          [](VarMap& v) -> std::shared_ptr<Variable> { return { Lexer::Lexeme::String, v["value"]->GetData().second }; }) },
     { "bool", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap v) -> Lexer::Token { return { Lexer::Lexeme::Bool, v["value"]->GetData().second }; }) }
+                          [](VarMap& v) -> std::shared_ptr<Variable> { return { Lexer::Lexeme::Bool, v["value"]->GetData().second }; }) }*/
 };

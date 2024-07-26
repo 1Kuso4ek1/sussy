@@ -32,7 +32,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     {
         for(auto i = scopes.rbegin(); i < scopes.rend(); i++)
         {
-            auto it = std::find_if(i->begin(), i->end(), [&](const auto& a) { return *a.second == var; });
+            auto it = std::find_if(i->begin(), i->end(), [&](const auto& a) { return a.second == var; });
             if(it != i->end())
                 return it->second;
         }
@@ -95,7 +95,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
             scopes.emplace_back();
 
-            if(node->children.size() > 1)
+            if(node->children.size() > 1 && node->expression.second == "for")
             {
                 nodes = GetCommaSeparatedNodes(node->children[0]);
                 for(auto& i : nodes)
@@ -106,9 +106,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             {
                 skipElse = false;
 
-                auto it = std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); });
-
-                if(it == args.end())
+                if(std::any_cast<bool>(GetReturn(node->children[0], scopes)->GetData()))
                 {
                     skipElse = true;
 
@@ -139,7 +137,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                 {
                     if((*i)->expression.first == Lexer::Lexeme::ReservedWord && ((*i)->expression.second == "case" || (*i)->expression.second == "default"))
                     {
-                        if(IsEqual(switchVar->GetData(), GetReturn((*i)->children[0], scopes)->GetData()).second == "true" || (*i)->expression.second == "default")
+                        if(std::any_cast<bool>(IsEqual(switchVar, GetReturn((*i)->children[0], scopes))->GetData()) || (*i)->expression.second == "default")
                         {
                             for(auto j : (*i)->children[1]->children)
                             {
@@ -155,7 +153,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             {
                 breakBlock = continueBlock = false;
 
-                while(std::find_if(args.begin(), args.end(), [&](const std::shared_ptr<Variable>& a) { return *a == Lexer::Token(Lexer::Lexeme::Bool, "false"); }) == args.end())
+                while(std::any_cast<bool>(GetReturn(node->children[0], scopes)->GetData()))
                 {
                     for(auto i : node->children[1]->children)
                     {
@@ -167,9 +165,6 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     
                     if(breakBlock || returnValue) break;
                     continueBlock = false;
-
-                    args.clear();
-                    args.push_back(GetReturn(node->children[0], scopes));
                 }
             }
             else if(node->expression.second == "for")
@@ -177,12 +172,13 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                 breakBlock = continueBlock = false;
 
                 auto iteratorVar = findVariableByPointer(args[0]);
-                int start = stoi(args[2]->GetData().second);
-                int end = stoi(args.back()->GetData().second);
+                int start = std::any_cast<int>(args[2]->GetData());
+                int end = std::any_cast<int>(args.back()->GetData());
 
                 for(int i = start; (start < end ? i < end : i > end); i += (start < end ? 1 : -1))
                 {
-                    *iteratorVar = Lexer::Token(Lexer::Lexeme::Int, std::to_string(i));
+                    iteratorVar->SetType(Variable::VariableType::Int);
+                    iteratorVar->SetData(i);
 
                     for(auto i : node->children[1]->children)
                     {
@@ -232,7 +228,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             it->second.SetArgs(args, scopes.back());
 
             if(!it->second.GetBody())
-                return std::make_shared<Variable>(it->second.Execute());
+                return it->second.Execute();
 
             returnValue = false;
 
@@ -261,9 +257,9 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             {
                 AST::NodeList args;
                 std::shared_ptr<AST::Node> body;
-            
+
                 args = GetCommaSeparatedNodes(node->children[1]);
-                
+
                 body = node->children[2];
 
                 auto it = scopes.back().find(node->children[0]->expression.second);
@@ -283,7 +279,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     auto value = GetReturn(node->children[1], scopes);
                     auto index = GetReturn(node->children[0]->children[1], scopes);
                     auto element = std::make_shared<Variable>(value->GetData());
-                    var->SetElement(stoi(index->GetData().second), element);
+                    var->SetElement(std::any_cast<int>(index->GetData()), element);
 
                     return element;
                 }
@@ -293,7 +289,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         else if(node->children[1]->expression.first == Lexer::Lexeme::Colon &&
                 node->children[1]->children[0]->expression.first == Lexer::Lexeme::Int)
         {
-            auto array = std::make_shared<Variable>(std::make_pair(Lexer::Lexeme::Word, node->children[0]->expression.second), Variable::VariableType::Array, stoi(GetReturn(node->children[1]->children[0], scopes)->GetData().second));
+            auto array = std::make_shared<Variable>(node->children[0]->expression.second, Variable::VariableType::Array, std::any_cast<int>(GetReturn(node->children[1]->children[0], scopes)->GetData()));
             array->Fill(GetReturn(node->children[1]->children[1], scopes)->GetData());
             scopes.back()[node->children[0]->expression.second] = array;
 
@@ -329,49 +325,49 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         if(var)
         {
             if(var->GetType() == Variable::VariableType::Array)
-                return var->GetElement(stoi(GetReturn(node->children[1], scopes)->GetData().second));
+                return var->GetElement(std::any_cast<int>(GetReturn(node->children[1], scopes)->GetData()));
         }
 
-        return std::make_shared<Variable>(Index(leftRet->GetData(), rightRet->GetData()));
+        return std::make_shared<Variable>(Index(leftRet, rightRet));
     }
 
-    case Lexer::Lexeme::AddAssign: return assign(std::make_shared<Variable>(Add(leftRet->GetData(), rightRet->GetData())));
-    case Lexer::Lexeme::SubtractAssign: return assign(std::make_shared<Variable>(Subtract(leftRet->GetData(), rightRet->GetData())));
-    case Lexer::Lexeme::MultiplyAssign: return assign(std::make_shared<Variable>(Multiply(leftRet->GetData(), rightRet->GetData())));
-    case Lexer::Lexeme::DivideAssign: return assign(std::make_shared<Variable>(Divide(leftRet->GetData(), rightRet->GetData())));
+    case Lexer::Lexeme::AddAssign: return assign(std::make_shared<Variable>(Add(leftRet, rightRet)));
+    case Lexer::Lexeme::SubtractAssign: return assign(std::make_shared<Variable>(Subtract(leftRet, rightRet)));
+    case Lexer::Lexeme::MultiplyAssign: return assign(std::make_shared<Variable>(Multiply(leftRet, rightRet)));
+    case Lexer::Lexeme::DivideAssign: return assign(std::make_shared<Variable>(Divide(leftRet, rightRet)));
 
-    case Lexer::Lexeme::IsNotEqual: return std::make_shared<Variable>(Not(IsEqual(leftRet->GetData(), rightRet->GetData())));
-    case Lexer::Lexeme::IsEqual: return std::make_shared<Variable>(IsEqual(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::IsLess: return std::make_shared<Variable>(IsLess(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::IsGreater: return std::make_shared<Variable>(IsGreater(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::IsLessOrEqual: return std::make_shared<Variable>(IsLessOrEqual(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::IsGreaterOrEqual: return std::make_shared<Variable>(IsGreaterOrEqual(leftRet->GetData(), rightRet->GetData()));
+    case Lexer::Lexeme::IsNotEqual: return std::make_shared<Variable>(Not(IsEqual(leftRet, rightRet)));
+    case Lexer::Lexeme::IsEqual: return std::make_shared<Variable>(IsEqual(leftRet, rightRet));
+    case Lexer::Lexeme::IsLess: return std::make_shared<Variable>(IsLess(leftRet, rightRet));
+    case Lexer::Lexeme::IsGreater: return std::make_shared<Variable>(IsGreater(leftRet, rightRet));
+    case Lexer::Lexeme::IsLessOrEqual: return std::make_shared<Variable>(IsLessOrEqual(leftRet, rightRet));
+    case Lexer::Lexeme::IsGreaterOrEqual: return std::make_shared<Variable>(IsGreaterOrEqual(leftRet, rightRet));
 
-    case Lexer::Lexeme::Not: return std::make_shared<Variable>(Not(GetReturn(node->children[0], scopes)->GetData()));
-    case Lexer::Lexeme::And: return std::make_shared<Variable>(And(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::Or: return std::make_shared<Variable>(Or(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::BitwiseAnd: return std::make_shared<Variable>(BitwiseAnd(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::BitwiseOr: return std::make_shared<Variable>(BitwiseOr(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::LeftShift: return std::make_shared<Variable>(LeftShift(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::RightShift: return std::make_shared<Variable>(RightShift(leftRet->GetData(), rightRet->GetData()));
+    case Lexer::Lexeme::Not: return std::make_shared<Variable>(Not(GetReturn(node->children[0], scopes)));
+    case Lexer::Lexeme::And: return std::make_shared<Variable>(And(leftRet, rightRet));
+    case Lexer::Lexeme::Or: return std::make_shared<Variable>(Or(leftRet, rightRet));
+    case Lexer::Lexeme::BitwiseAnd: return std::make_shared<Variable>(BitwiseAnd(leftRet, rightRet));
+    case Lexer::Lexeme::BitwiseOr: return std::make_shared<Variable>(BitwiseOr(leftRet, rightRet));
+    case Lexer::Lexeme::LeftShift: return std::make_shared<Variable>(LeftShift(leftRet, rightRet));
+    case Lexer::Lexeme::RightShift: return std::make_shared<Variable>(RightShift(leftRet, rightRet));
 
-    case Lexer::Lexeme::Decrement: return assign(std::make_shared<Variable>(Decrement(GetReturn(node->children[0], scopes)->GetData())));
-    case Lexer::Lexeme::Increment: return assign(std::make_shared<Variable>(Increment(GetReturn(node->children[0], scopes)->GetData())));
+    case Lexer::Lexeme::Decrement: return assign(std::make_shared<Variable>(Decrement(GetReturn(node->children[0], scopes))));
+    case Lexer::Lexeme::Increment: return assign(std::make_shared<Variable>(Increment(GetReturn(node->children[0], scopes))));
 
-    case Lexer::Lexeme::Plus: return std::make_shared<Variable>(Add(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::UnaryMinus: return std::make_shared<Variable>(Negate(GetReturn(node->children[0], scopes)->GetData()));
-    case Lexer::Lexeme::Minus: return std::make_shared<Variable>(Subtract(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::Multiply: return std::make_shared<Variable>(Multiply(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::Divide: return std::make_shared<Variable>(Divide(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::Pow: return std::make_shared<Variable>(Pow(leftRet->GetData(), rightRet->GetData()));
-    case Lexer::Lexeme::Mod: return std::make_shared<Variable>(Mod(leftRet->GetData(), rightRet->GetData()));
+    case Lexer::Lexeme::Plus: return std::make_shared<Variable>(Add(leftRet, rightRet));
+    case Lexer::Lexeme::UnaryMinus: return std::make_shared<Variable>(Negate(GetReturn(node->children[0], scopes)));
+    case Lexer::Lexeme::Minus: return std::make_shared<Variable>(Subtract(leftRet, rightRet));
+    case Lexer::Lexeme::Multiply: return std::make_shared<Variable>(Multiply(leftRet, rightRet));
+    case Lexer::Lexeme::Divide: return std::make_shared<Variable>(Divide(leftRet, rightRet));
+    case Lexer::Lexeme::Pow: return std::make_shared<Variable>(Pow(leftRet, rightRet));
+    case Lexer::Lexeme::Mod: return std::make_shared<Variable>(Mod(leftRet, rightRet));
     }
   
     return std::make_shared<Variable>(Lexer::Token(Lexer::Lexeme::None, ""));
 }
 
 // Twice as SLOW
-void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& scopes)
+/*void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& scopes)
 {
     std::stack<std::shared_ptr<AST::Node>> stack;
     std::stack<std::shared_ptr<AST::Node>> waitingForArgs;
@@ -585,7 +581,7 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
                 if(!waitingForArgs.empty())
                     top = waitingForArgs.top();
 
-                if(/*valueStack.size() < it->second.GetArgsCount() || */node != top)
+                if(node != top)
                 {
                     discardValue = false;
 
@@ -639,7 +635,6 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
             if(node == top)
             {
                 returnValue = discardValue = false;
-                //scopes.back() = variables;
                 if(scopes.back().size() == 0 && scopes.size() > 2)
                     scopes.pop_back();
                 scopes.pop_back();
@@ -684,4 +679,4 @@ void GetReturnIterative(std::shared_ptr<AST::Node> root, std::vector<VarMap>& sc
             break;
         }
     }
-}
+}*/

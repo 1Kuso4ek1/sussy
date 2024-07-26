@@ -30,7 +30,7 @@ std::shared_ptr<AST::Node> Function::GetBody()
     return body;
 }
 
-Lexer::Token Function::Execute()
+std::shared_ptr<Variable> Function::Execute()
 {
     return cppbody(localVariables);
 }

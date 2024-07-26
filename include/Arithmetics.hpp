@@ -1,215 +1,217 @@
 #pragma once
 #include <cmath>
+#include <iostream>
 
 #include "Lexer.hpp"
+#include "Variable.hpp"
 
-static Lexer::Token Index(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Index(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    if(left.first == Lexer::Lexeme::String)
-        return { Lexer::Lexeme::String, std::string(1, left.second[stoi(right.second)]) };
+    if(left->GetType() == Variable::VariableType::String)
+        return std::make_shared<Variable>(std::string(1, std::any_cast<std::string>(left->GetData())[std::any_cast<int>(right->GetData())]), Variable::VariableType::String);
 
     return right;
 }
 
-static Lexer::Token IsLess(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> IsLess(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Bool, stoi(left.second) < stoi(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Bool, stof(left.second) < stof(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::String:
-        return { Lexer::Lexeme::Bool, left.second.size() < right.second.size() ? "true" : "false" };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) < std::any_cast<int>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) < std::any_cast<float>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::String:
+        return std::make_shared<Variable>(std::any_cast<std::string>(left->GetData()).size() < std::any_cast<std::string>(right->GetData()).size(), Variable::VariableType::Bool);
     }
 
-    return { Lexer::Lexeme::Bool, "false" };
+    return std::make_shared<Variable>(false, Variable::VariableType::Bool);
 }
 
-static Lexer::Token IsGreater(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> IsGreater(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Bool, stoi(left.second) > stoi(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Bool, stof(left.second) > stof(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::String:
-        return { Lexer::Lexeme::Bool, left.second.size() > right.second.size() ? "true" : "false" };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) > std::any_cast<int>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) > std::any_cast<float>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::String:
+        return std::make_shared<Variable>(std::any_cast<std::string>(left->GetData()).size() > std::any_cast<std::string>(right->GetData()).size(), Variable::VariableType::Bool);
     }
 
-    return { Lexer::Lexeme::Bool, "false" };
+    return std::make_shared<Variable>(false, Variable::VariableType::Bool);
 }
 
-static Lexer::Token IsLessOrEqual(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> IsLessOrEqual(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Bool, stoi(left.second) <= stoi(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Bool, stof(left.second) <= stof(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::String:
-        return { Lexer::Lexeme::Bool, left.second.size() <= right.second.size() ? "true" : "false" };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) <= std::any_cast<int>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) <= std::any_cast<float>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::String:
+        return std::make_shared<Variable>(std::any_cast<std::string>(left->GetData()).size() <= std::any_cast<std::string>(right->GetData()).size(), Variable::VariableType::Bool);
     }
 
-    return { Lexer::Lexeme::Bool, "false" };
+    return std::make_shared<Variable>(false, Variable::VariableType::Bool);
 }
 
-static Lexer::Token IsGreaterOrEqual(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> IsGreaterOrEqual(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Bool, stoi(left.second) >= stoi(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Bool, stof(left.second) >= stof(right.second) ? "true" : "false" };
-    case Lexer::Lexeme::String:
-        return { Lexer::Lexeme::Bool, left.second.size() >= right.second.size() ? "true" : "false" };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) >= std::any_cast<int>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) >= std::any_cast<float>(right->GetData()), Variable::VariableType::Bool);
+    case Variable::VariableType::String:
+        return std::make_shared<Variable>(std::any_cast<std::string>(left->GetData()).size() >= std::any_cast<std::string>(right->GetData()).size(), Variable::VariableType::Bool);
     }
 
-    return { Lexer::Lexeme::Bool, "false" };
+    return std::make_shared<Variable>(false, Variable::VariableType::Bool);
 }
 
-static Lexer::Token IsEqual(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> IsEqual(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Bool, left.second == right.second ? "true" : "false" };
+    return std::make_shared<Variable>(*left == right, Variable::VariableType::Bool);
 }
 
-static Lexer::Token Not(Lexer::Token value)
+static std::shared_ptr<Variable> Not(std::shared_ptr<Variable> value)
 {
-    return { Lexer::Lexeme::Bool, value.second == "true" ? "false" : "true" };
+    return std::make_shared<Variable>(!std::any_cast<bool>(value->GetData()), Variable::VariableType::Bool);
 }
 
-static Lexer::Token And(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> And(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Bool, left.second == "true" && right.second == "true" ? "true" : "false" };
+    return std::make_shared<Variable>(std::any_cast<bool>(left->GetData()) && std::any_cast<bool>(right->GetData()), Variable::VariableType::Bool);
 }
 
-static Lexer::Token Or(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Or(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Bool, left.second == "true" || right.second == "true" ? "true" : "false" };
+    return std::make_shared<Variable>(std::any_cast<bool>(left->GetData()) || std::any_cast<bool>(right->GetData()), Variable::VariableType::Bool);
 }
 
-static Lexer::Token BitwiseAnd(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> BitwiseAnd(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) & stoi(right.second)) };
+    return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) & std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
 }
 
-static Lexer::Token BitwiseOr(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> BitwiseOr(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) | stoi(right.second)) };
+    return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) | std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
 }
 
-static Lexer::Token LeftShift(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> LeftShift(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) << stoi(right.second)) };
+    return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) << std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
 }
 
-static Lexer::Token RightShift(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> RightShift(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) >> stoi(right.second)) };
+    return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) >> std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
 }
 
-static Lexer::Token Decrement(Lexer::Token value)
+static std::shared_ptr<Variable> Decrement(std::shared_ptr<Variable> value)
 {
-    return { Lexer::Lexeme::Int, std::to_string(stoi(value.second) - 1) };
+    return std::make_shared<Variable>(std::any_cast<int>(value->GetData()) - 1, Variable::VariableType::Int);
 }
 
-static Lexer::Token Increment(Lexer::Token value)
+static std::shared_ptr<Variable> Increment(std::shared_ptr<Variable> value)
 {
-    return { Lexer::Lexeme::Int, std::to_string(stoi(value.second) + 1) };
+    return std::make_shared<Variable>(std::any_cast<int>(value->GetData()) + 1, Variable::VariableType::Int);
 }
 
-static Lexer::Token Add(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Add(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) + stoi(right.second)) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(stof(left.second) + stof(right.second)) };
-    case Lexer::Lexeme::String:
-        return { Lexer::Lexeme::String, left.second + right.second };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) + std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) + std::any_cast<float>(right->GetData()), Variable::VariableType::Float);
+    case Variable::VariableType::String:
+        return std::make_shared<Variable>(std::any_cast<std::string>(left->GetData()) + std::any_cast<std::string>(right->GetData()), Variable::VariableType::String);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }
 
-static Lexer::Token Subtract(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Subtract(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) - stoi(right.second)) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(stof(left.second) - stof(right.second)) };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) - std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) - std::any_cast<float>(right->GetData()), Variable::VariableType::Float);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }
 
-static Lexer::Token Negate(Lexer::Token number)
+static std::shared_ptr<Variable> Negate(std::shared_ptr<Variable> number)
 {
-    switch(number.first)
+    switch(number->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(-stoi(number.second)) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(-stof(number.second)) };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(-std::any_cast<int>(number->GetData()), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(-std::any_cast<float>(number->GetData()), Variable::VariableType::Float);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }
 
-static Lexer::Token Multiply(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Multiply(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) * stoi(right.second)) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(stof(left.second) * stof(right.second)) };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) * std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) * std::any_cast<float>(right->GetData()), Variable::VariableType::Float);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }
 
-static Lexer::Token Divide(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Divide(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) / stoi(right.second)) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(stof(left.second) / stof(right.second)) };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) / std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) / std::any_cast<float>(right->GetData()), Variable::VariableType::Float);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }
 
-static Lexer::Token Pow(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Pow(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(int(std::pow(stof(left.second), stof(right.second)))) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(std::pow(stof(left.second), stof(right.second))) };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(int(std::pow(std::any_cast<int>(left->GetData()), std::any_cast<int>(right->GetData()))), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(std::pow(std::any_cast<float>(left->GetData()), std::any_cast<float>(right->GetData())), Variable::VariableType::Float);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }
 
-static Lexer::Token Mod(Lexer::Token left, Lexer::Token right)
+static std::shared_ptr<Variable> Mod(std::shared_ptr<Variable> left, std::shared_ptr<Variable> right)
 {
-    switch(left.first)
+    switch(left->GetType())
     {
-    case Lexer::Lexeme::Int:
-        return { Lexer::Lexeme::Int, std::to_string(stoi(left.second) % stoi(right.second)) };
-    case Lexer::Lexeme::Float:
-        return { Lexer::Lexeme::Float, std::to_string(fmod(stof(left.second), stof(right.second))) };
+    case Variable::VariableType::Int:
+        return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) % std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
+    case Variable::VariableType::Float:
+        return std::make_shared<Variable>(fmod(std::any_cast<float>(left->GetData()), std::any_cast<float>(right->GetData())), Variable::VariableType::Float);
     }
 
-    return { Lexer::Lexeme::None, "" };
+    return std::make_shared<Variable>();
 }

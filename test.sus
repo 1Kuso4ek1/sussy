@@ -7,12 +7,12 @@ a = inputNumber();
 op = inputOperator();
 
 if(op == '!') -> 
-    println(string(a) + op + " = " + fact(a));
+    println(string(a) + op + " = " + string(fact(a)));
 else
 {
     b = inputNumber();
 
-    print(string(a) + ' ' + op + ' ' + b + " = ");
+    print(string(a) + ' ' + op + ' ' + string(b) + " = ");
 
     switch(op)
     {
