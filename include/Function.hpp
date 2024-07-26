@@ -13,6 +13,7 @@ static std::shared_ptr<Variable> CallFuncForDiffTypes(Variable::VariableType typ
     case Variable::VariableType::Float: return cases[1](v);
     case Variable::VariableType::String: return cases[2](v);
     case Variable::VariableType::Bool: return cases[3](v);
+    case Variable::VariableType::Array: return cases[4](v);
     default: return nullptr;
     }
 }
@@ -106,10 +107,17 @@ static FunctionMap functions =
                                 [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(std::string(std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false"), Variable::VariableType::String); }
                             }, v);
                         }) },
-    /*{ "float", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap& v) -> std::shared_ptr<Variable> { return { Lexer::Lexeme::Float, v["value"]->GetData().second }; }) },
-    { "string", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap& v) -> std::shared_ptr<Variable> { return { Lexer::Lexeme::String, v["value"]->GetData().second }; }) },
-    { "bool", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
-                          [](VarMap& v) -> std::shared_ptr<Variable> { return { Lexer::Lexeme::Bool, v["value"]->GetData().second }; }) }*/
+
+    { "size", Function({ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                        [](VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            return CallFuncForDiffTypes(v["value"]->GetType(),
+                            {
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<int>(v["value"]->GetData())), Variable::VariableType::Int); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<float>(v["value"]->GetData())), Variable::VariableType::Int); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)std::any_cast<std::string>(v["value"]->GetData()).size(), Variable::VariableType::Int); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false"), Variable::VariableType::Int); },
+                                [](VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(v["value"]->GetArraySize(), Variable::VariableType::Int); }
+                            }, v);
+                        }) }
 };

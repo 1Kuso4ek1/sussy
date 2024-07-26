@@ -1,5 +1,5 @@
 #include <Variable.hpp>
-
+#include <iostream>
 Variable::Variable(Lexer::Token type)
 {
     switch(type.first)
@@ -105,11 +105,17 @@ bool Variable::operator==(std::shared_ptr<Variable> variable)
     return false;
 }
 
+int Variable::GetArraySize()
+{
+    return array.size();
+}
+
 std::shared_ptr<Variable> Variable::GetElement(int index)
 {
     if(index < array.size())
         return array[index];
 
+    std::cout << index << std::endl;
     return nullptr;
 }
 

@@ -137,7 +137,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                 {
                     if((*i)->expression.first == Lexer::Lexeme::ReservedWord && ((*i)->expression.second == "case" || (*i)->expression.second == "default"))
                     {
-                        if(std::any_cast<bool>(IsEqual(switchVar, GetReturn((*i)->children[0], scopes))->GetData()) || (*i)->expression.second == "default")
+                        if((*i)->expression.second == "default" ? true : std::any_cast<bool>(IsEqual(switchVar, GetReturn((*i)->children[0], scopes))->GetData()))
                         {
                             for(auto j : (*i)->children[1]->children)
                             {
@@ -295,7 +295,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
             return array->GetElement(0);
         }
-        else if(node->children[0]->expression.first == Lexer::Lexeme::Comma)
+        else if(node->children[1]->expression.first == Lexer::Lexeme::Comma)
         {
             // make it a separate function
             AST::NodeList nodes;
@@ -306,12 +306,13 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
             auto var = findVariableByName(node->children[0]->expression.second);
             if(var)
-                if(var->GetType() == Variable::VariableType::Array)
-                {
-                    for(int i = 0; i < args.size(); i++)
-                        var->SetElement(i, args[i]);
-                    return var->GetElement(args.size() - 1);
-                }
+            //if(var->GetType() == Variable::VariableType::Array)
+            {
+                var->SetType(Variable::VariableType::Array);
+                for(int i = 0; i < args.size(); i++)
+                    var->SetElement(i, args[i]);
+                return var->GetElement(args.size() - 1);
+            }
 
             return std::make_shared<Variable>(node->expression);
         }

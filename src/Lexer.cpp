@@ -151,7 +151,7 @@ void Lexer::Tokenize(const std::string& input)
                 tokens.back().second = "/=";
                 return;
             }
-            else if(l == Lexeme::IsGreater && tokens.back().first == Lexeme::Minus)
+            else if(l == Lexeme::IsGreater && (tokens.back().first == Lexeme::Minus || tokens.back().first == Lexeme::UnaryMinus))
             {
                 tokens.back().first = Lexeme::Arrow;
                 tokens.back().second = "->";

@@ -14,6 +14,7 @@ public:
         Bool,
         String,
         Array,
+        Function,
         Object
     };
 
@@ -33,6 +34,7 @@ public:
     bool operator==(std::any data);
     bool operator==(std::shared_ptr<Variable> variable);
 
+    int GetArraySize();
     std::shared_ptr<Variable> GetElement(int index);
     VariableType GetType();
     std::any GetData();
