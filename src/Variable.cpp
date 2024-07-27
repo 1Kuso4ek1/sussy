@@ -128,3 +128,8 @@ std::any Variable::GetData()
 {
     return data;
 }
+
+AST::NodeList Variable::GetArgs()
+{
+    return args;
+}

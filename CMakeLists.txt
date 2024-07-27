@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 
 project(sussy VERSION 0.0.0 LANGUAGES CXX)
 
-add_executable(sussy main.cpp src/Lexer.cpp src/AST.cpp src/Variable.cpp src/Function.cpp src/Exec.cpp src/Structure.cpp)
+add_executable(sussy main.cpp src/Lexer.cpp src/AST.cpp src/Variable.cpp src/Exec.cpp src/Structure.cpp)
 
 target_link_libraries(sussy stdc++fs)
 

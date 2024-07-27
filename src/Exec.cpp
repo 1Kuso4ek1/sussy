@@ -217,25 +217,31 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     {
         if(!node->children.empty())
         {
-            auto it = functions.find(node->expression.second);
-            if(it == functions.end()) return std::make_shared<Variable>(node->expression);
+            auto func = findVariableByName(node->expression.second);
+            if(func ? func->GetType() != Variable::VariableType::Function &&
+                      func->GetType() != Variable::VariableType::CppFunction : true)
+                return std::make_shared<Variable>(node->expression);
 
             auto nodes = GetCommaSeparatedNodes(node->children[0]);
             std::vector<std::shared_ptr<Variable>> args;
             for(auto& i : nodes)
                 args.push_back(GetReturn(i, scopes));
 
-            it->second.SetArgs(args, scopes.back());
+            auto functionArgs = func->GetArgs();
 
-            if(!it->second.GetBody())
-                return it->second.Execute();
+            scopes.emplace_back();
+
+            for(int i = 0; i < functionArgs.size(); i++)
+                if(i < args.size())
+                    scopes.back()[functionArgs[i]->expression.second] = args[i];
+
+            if(func->GetType() == Variable::VariableType::CppFunction)
+                return std::any_cast<std::function<std::shared_ptr<Variable>(VarMap&)>>(func->GetData())(scopes.back());
 
             returnValue = false;
 
-            scopes.push_back(it->second.GetLocalVariables());
-
             std::shared_ptr<Variable> ret;
-            auto c = it->second.GetBody()->children;
+            auto c = std::any_cast<std::shared_ptr<AST::Node>>(func->GetData())->children;
             for(auto i = c.begin(); i < c.end() && !returnValue; i++)
                 ret = GetReturn(*i, scopes);
 
@@ -255,17 +261,10 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         if(node->children.size() > 2)
             if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen)
             {
-                AST::NodeList args;
-                std::shared_ptr<AST::Node> body;
+                auto args = GetCommaSeparatedNodes(node->children[1]);
+                auto body = node->children[2];
 
-                args = GetCommaSeparatedNodes(node->children[1]);
-
-                body = node->children[2];
-
-                auto it = scopes.back().find(node->children[0]->expression.second);
-                if(it != scopes.back().end())
-                    scopes.back().erase(it);
-                functions[node->children[0]->expression.second] = Function(args, body);
+                scopes.back()[node->children[0]->expression.second] = std::make_shared<Variable>(args, body, Variable::VariableType::Function);
 
                 return nullptr;
             }

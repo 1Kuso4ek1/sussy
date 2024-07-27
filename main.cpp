@@ -75,7 +75,7 @@ int main(int argc, char** argv)
         if(std::string(argv[2]) == "--ast")
             PrintAST(ast.GetRootNode());
 
-    std::vector<VarMap> scopes { { } };
+    std::vector<VarMap> scopes { defaultVariables };
 
     for(auto i : ast.GetRootNode()->children)
         GetReturn(i, scopes);

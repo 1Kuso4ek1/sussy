@@ -1,7 +1,6 @@
 #pragma once
 #include "AST.hpp"
 #include "Variable.hpp"
-#include "Function.hpp"
 
 class Struct
 {
@@ -15,5 +14,4 @@ private:
     std::shared_ptr<AST::Node> body;
 
     VarMap localVariables;
-    FunctionMap localFunctions;
 };
