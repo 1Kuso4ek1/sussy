@@ -263,7 +263,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
     case Lexer::Lexeme::Equal:
     {
         if(node->children.size() > 2)
-            if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen)
+            if(node->children[2]->expression.first == Lexer::Lexeme::CurlyBraceOpen ||
+               node->children[2]->expression.first == Lexer::Lexeme::Arrow)
             {
                 auto args = GetCommaSeparatedNodes(node->children[1]);
                 auto body = node->children[2];
