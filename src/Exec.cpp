@@ -233,10 +233,14 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
             for(int i = 0; i < functionArgs.size(); i++)
                 if(i < args.size())
-                    scopes.back()[functionArgs[i]->expression.second] = args[i];
+                    scopes.back()[functionArgs[i]->expression.second] = std::make_shared<Variable>(args[i]);
 
             if(func->GetType() == Variable::VariableType::CppFunction)
-                return std::any_cast<std::function<std::shared_ptr<Variable>(VarMap&)>>(func->GetData())(scopes.back());
+            {
+                ret = std::any_cast<std::function<std::shared_ptr<Variable>(VarMap&)>>(func->GetData())(scopes.back());
+                scopes.pop_back();
+                return ret;
+            }
 
             returnValue = false;
 
