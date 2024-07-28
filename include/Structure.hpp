@@ -13,5 +13,5 @@ public:
 private:
     std::shared_ptr<AST::Node> body;
 
-    VarMap localVariables;
+    Variable::VarMap localVariables;
 };

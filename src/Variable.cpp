@@ -133,3 +133,8 @@ AST::NodeList Variable::GetArgs()
 {
     return args;
 }
+
+Variable::VarMap& Variable::GetMembers()
+{
+    return members;
+}
