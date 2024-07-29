@@ -33,6 +33,7 @@ Variable::Variable(std::shared_ptr<Variable> variable)
     this->type = variable->type;
     this->data = variable->data;
     this->array = variable->array;
+    this->members = variable->members;
 }
 
 void Variable::SetType(VariableType type)
@@ -74,6 +75,7 @@ Variable& Variable::operator=(std::shared_ptr<Variable> variable)
     data = variable->data;
     type = variable->type;
     array = variable->array;
+    members = variable->members;
 
     return *this;
 }

@@ -1,0 +1,32 @@
+Vector2 = struct
+{
+    x = 0.0;
+    y = 0.0;
+
+    set = (_x, _y)
+    {
+        x = _x;
+        y = _y;
+    }
+
+    add = (vec)
+    {
+        x += vec.x;
+        y += vec.y;
+    }
+
+    printData = () ->
+        println("Vector2(" + string(x) + ", " + string(y) + ")");
+}
+
+vec = Vector2();
+vec1 = Vector2();
+
+vec.set(10.0, 20.0);
+vec1.set(50.0, 200.0);
+
+vec.printData();
+vec1.printData();
+
+vec.add(vec1);
+vec.printData();

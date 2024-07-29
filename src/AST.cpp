@@ -182,7 +182,7 @@ int AST::GetOperatorPriority(Lexer::Lexeme lexeme)
     switch(lexeme)
     {
     case Lexer::Lexeme::Comma: return 3;
-    case Lexer::Lexeme::Dot: return 1;
+    case Lexer::Lexeme::Dot: return 9;
     case Lexer::Lexeme::IsLess: return 4;
     case Lexer::Lexeme::IsGreater: return 4;
     case Lexer::Lexeme::IsLessOrEqual: return 4;
