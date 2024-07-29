@@ -78,7 +78,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         return data;
     };
 
-    if(node->children.size() == 2 && node->expression.first != Lexer::Lexeme::ReservedWord) // Improve
+    if(node->children.size() == 2 && node->expression.first != Lexer::Lexeme::ReservedWord
+                                  && node->expression.first != Lexer::Lexeme::Dot) // Improve
     {
         leftRet = GetReturn(node->children[0], scopes);
         rightRet = GetReturn(node->children[1], scopes);

@@ -13,6 +13,8 @@ Vector2 = struct
     {
         x += vec.x;
         y += vec.y;
+
+        return this;
     }
 
     printData = () ->
@@ -28,5 +30,5 @@ vec1.set(50.0, 200.0);
 vec.printData();
 vec1.printData();
 
-vec.add(vec1);
+vec.add(vec1).add(vec);
 vec.printData();
