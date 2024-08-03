@@ -54,7 +54,6 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         }
         if(node->expression.first != Lexer::Lexeme::ReservedWord)
             return std::make_shared<Variable>(node->expression);
-        return nullptr;
     }
 
     std::shared_ptr<Variable> leftRet;
