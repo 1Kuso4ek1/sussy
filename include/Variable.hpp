@@ -148,8 +148,11 @@ static Variable::VarMap defaultVariables =
                                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<int>(v["value"]->GetData())), Variable::VariableType::Int); },
                                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<float>(v["value"]->GetData())), Variable::VariableType::Int); },
                                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)std::any_cast<std::string>(v["value"]->GetData()).size(), Variable::VariableType::Int); },
-                                [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false"), Variable::VariableType::Int); },
+                                [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<bool>(v["value"]->GetData())), Variable::VariableType::Int); },
                                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(v["value"]->GetArraySize(), Variable::VariableType::Int); }
                             }, v);
-                        })) }
+                        })) },
+
+    { "srand", std::make_shared<Variable>(AST::NodeList{ }, std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { srand(int(time(0))); return nullptr; })) },
+    { "rand", std::make_shared<Variable>(AST::NodeList{ }, std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(int(rand()), Variable::VariableType::Int); })) }
 };

@@ -285,63 +285,24 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
                 return nullptr;
             }
-        
-        if(node->children[0]->expression.first == Lexer::Lexeme::Colon)
-        {
-            auto var = findVariableByName(node->children[0]->children[0]->expression.second);
-            if(var)
-                if(var->GetType() == Variable::VariableType::Array)
-                {
-                    auto value = GetReturn(node->children[1], scopes);
-                    auto index = GetReturn(node->children[0]->children[1], scopes);
-                    auto element = std::make_shared<Variable>(value->GetData());
-                    var->SetElement(std::any_cast<int>(index->GetData()), element);
-
-                    return element;
-                }
-
-            return std::make_shared<Variable>(node->expression);
-        }
-        else if(node->children[1]->expression.first == Lexer::Lexeme::Colon &&
-                node->children[1]->children[0]->expression.first == Lexer::Lexeme::Int)
-        {
-            auto array = std::make_shared<Variable>(node->children[0]->expression.second,
-                                                    Variable::VariableType::Array,
-                                                    std::any_cast<int>(GetReturn(node->children[1]->children[0], scopes)->GetData()));
-
-            array->Fill(GetReturn(node->children[1]->children[1], scopes)->GetData());
-            scopes.back().get()[node->children[0]->expression.second] = array;
-
-            return array->GetElement(0);
-        }
-        else if(node->children[1]->expression.first == Lexer::Lexeme::Comma)
-        {
-            // make it a separate function
-            AST::NodeList nodes;
-            nodes = GetCommaSeparatedNodes(node->children[1]);
-            std::vector<std::shared_ptr<Variable>> args;
-            for(auto& i : nodes)
-                args.push_back(GetReturn(i, scopes));
-
-            auto var = findVariableByName(node->children[0]->expression.second);
-            if(var)
-            //if(var->GetType() == Variable::VariableType::Array)
-            {
-                var->SetType(Variable::VariableType::Array);
-                for(int i = 0; i < args.size(); i++)
-                    var->SetElement(i, args[i]);
-                return var->GetElement(args.size() - 1);
-            }
-
-            return std::make_shared<Variable>(node->expression);
-        }
 
         return assign(rightRet);
     }
 
     case Lexer::Lexeme::Colon:
     {
-        auto var = findVariableByName(node->children[0]->expression.second);
+        if(node->children[0]->expression.first == Lexer::Lexeme::Int)
+        {
+            auto array = std::make_shared<Variable>(0, Variable::VariableType::Array,
+                                                    std::any_cast<int>(GetReturn(node->children[0], scopes)->GetData()));
+
+            array->Fill(GetReturn(node->children[1], scopes)->GetData());
+
+            return array;
+        }
+        
+        auto var = leftRet ? leftRet : findVariableByName(node->children[0]->expression.second);
+
         if(var)
         {
             if(var->GetType() == Variable::VariableType::Array)
@@ -372,7 +333,10 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                         var->GetMembers()["this"] = var;
                     }
 
-                    ret = GetReturn(node->children[1], scopes);
+                    if(node->children[1]->expression.first == Lexer::Lexeme::Word && node->children[1]->children.empty())
+                        ret = var->GetMembers()[node->children[1]->expression.second];
+                    else
+                        ret = GetReturn(node->children[1], scopes);
 
                     scopes.pop_back();
 
@@ -395,6 +359,22 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         }
 
         return ret;
+
+    case Lexer::Lexeme::Comma:
+    {
+        // make it a separate function
+        AST::NodeList nodes;
+        nodes = GetCommaSeparatedNodes(node);
+        std::vector<std::shared_ptr<Variable>> args;
+        for(auto& i : nodes)
+            args.push_back(GetReturn(i, scopes));
+
+        auto var = std::make_shared<Variable>(0, Variable::VariableType::Array, args.size());
+        for(int i = 0; i < args.size(); i++)
+            var->SetElement(i, args[i]);
+
+        return var;
+    }
 
     case Lexer::Lexeme::AddAssign: return assign(std::make_shared<Variable>(Add(leftRet, rightRet)));
     case Lexer::Lexeme::SubtractAssign: return assign(std::make_shared<Variable>(Subtract(leftRet, rightRet)));

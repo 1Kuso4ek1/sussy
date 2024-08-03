@@ -172,6 +172,17 @@ static std::shared_ptr<Variable> Multiply(std::shared_ptr<Variable> left, std::s
         return std::make_shared<Variable>(std::any_cast<int>(left->GetData()) * std::any_cast<int>(right->GetData()), Variable::VariableType::Int);
     case Variable::VariableType::Float:
         return std::make_shared<Variable>(std::any_cast<float>(left->GetData()) * std::any_cast<float>(right->GetData()), Variable::VariableType::Float);
+    case Variable::VariableType::String:
+    {
+        std::string str = std::any_cast<std::string>(left->GetData());
+        std::string ret = "";
+        int limit = std::any_cast<int>(right->GetData());
+
+        for(int i = 0; i < limit; i++)
+            ret += str;
+            
+        return std::make_shared<Variable>(ret, Variable::VariableType::String);
+    }
     }
 
     return std::make_shared<Variable>();
