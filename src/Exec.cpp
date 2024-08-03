@@ -69,7 +69,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
     auto assign = [&](std::shared_ptr<Variable> data)
     {
-        auto var = findVariableByName(node->children[0]->expression.second);
+        auto var = leftRet ? leftRet : findVariableByName(node->children[0]->expression.second);
         if(var)
         {
             *(var) = data;
@@ -356,7 +356,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
         if(node->children.size() > 1)
         {
             std::shared_ptr<Variable> var;
-            if(node->children[0]->expression.first == Lexer::Lexeme::Dot)
+            if(node->children[0]->expression.first != Lexer::Lexeme::Word)
                 var = GetReturn(node->children[0], scopes);
             else
                 var = findVariableByName(node->children[0]->expression.second);
@@ -364,14 +364,16 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             {
                 if(var->GetType() == Variable::VariableType::Object)
                 {
-                    scopes.emplace_back(var->GetMembers());
-                    if(scopes.back().get().empty())
+                    scopes.push_back(var->GetMembers());
+                    
+                    if(var->GetMembers().empty())
                     {
                         GetReturn(std::any_cast<std::shared_ptr<AST::Node>>(var->GetData()), scopes);
-                        scopes.back().get()["this"] = var;
+                        var->GetMembers()["this"] = var;
                     }
 
                     ret = GetReturn(node->children[1], scopes);
+
                     scopes.pop_back();
 
                     return ret;

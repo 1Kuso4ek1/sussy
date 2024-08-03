@@ -21,14 +21,11 @@ Vector2 = struct
         println("Vector2(" + string(x) + ", " + string(y) + ")");
 }
 
-vec = Vector2();
-vec1 = Vector2();
+vec = Vector2; vec.set(0.0, 20.0);
+vec1 = Vector2; vec1.set(50.0, 10.0);
 
-vec.set(10.0, 20.0);
-vec1.set(50.0, 200.0);
+vec.x = 10.0;
 
 vec.printData();
 vec1.printData();
 
-vec.add(vec1).add(vec);
-vec.printData();

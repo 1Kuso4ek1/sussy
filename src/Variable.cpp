@@ -117,7 +117,6 @@ std::shared_ptr<Variable> Variable::GetElement(int index)
     if(index < array.size())
         return array[index];
 
-    std::cout << index << std::endl;
     return nullptr;
 }
 
