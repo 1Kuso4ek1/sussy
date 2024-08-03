@@ -86,6 +86,7 @@ static Variable::VarMap defaultVariables =
                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { std::cout << (std::any_cast<bool>(v["value"]->GetData()) ? "true" : "false"); return nullptr; }
             }, v);
         })) },
+
     { "println", std::make_shared<Variable>(AST::NodeList{ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
                         std::function<std::shared_ptr<Variable>(Variable::VarMap&)>(
                         [](Variable::VarMap& v) -> std::shared_ptr<Variable>
@@ -154,5 +155,7 @@ static Variable::VarMap defaultVariables =
                         })) },
 
     { "srand", std::make_shared<Variable>(AST::NodeList{ }, std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { srand(int(time(0))); return nullptr; })) },
-    { "rand", std::make_shared<Variable>(AST::NodeList{ }, std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(int(rand()), Variable::VariableType::Int); })) }
+    { "rand", std::make_shared<Variable>(AST::NodeList{ }, std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(int(rand()), Variable::VariableType::Int); })) },
+    { "system", std::make_shared<Variable>(AST::NodeList{ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                        std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { system(std::any_cast<std::string>(v["value"]->GetData()).c_str()); return nullptr; })) }
 };

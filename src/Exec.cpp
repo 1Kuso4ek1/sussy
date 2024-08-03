@@ -167,6 +167,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     if(breakBlock || returnValue) break;
                     continueBlock = false;
                 }
+
+                breakBlock = continueBlock = false;
             }
             else if(node->expression.second == "for")
             {
@@ -192,6 +194,8 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
                     if(breakBlock || returnValue) break;
                     continueBlock = false;
                 }
+
+                breakBlock = continueBlock = false;
             }
             else if(node->expression.second == "return")
             {
