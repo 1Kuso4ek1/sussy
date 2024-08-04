@@ -109,13 +109,13 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
                 if(std::any_cast<bool>(GetReturn(node->children[0], scopes)->GetData()))
                 {
-                    skipElse = true;
-
                     for(auto i : node->children[1]->children)
                     {
                         ret = GetReturn(i, scopes);
                         if(returnValue) break;
                     }
+
+                    skipElse = true;
                 }
             }
             else if(node->expression.second == "else" && !skipElse)
@@ -209,6 +209,7 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
             return ret;
         }
         
+        returnValue = (node->expression.second == "return");
         breakBlock = (node->expression.second == "break");
         continueBlock = (node->expression.second == "continue");
 
@@ -242,7 +243,10 @@ std::shared_ptr<Variable> GetReturn(std::shared_ptr<AST::Node> node, std::vector
 
             for(int i = 0; i < functionArgs.size(); i++)
                 if(i < args.size())
-                    scopes.back().get()[functionArgs[i]->expression.second] = std::make_shared<Variable>(args[i]);
+                {
+                    auto var = (args[i]->GetType() == Variable::VariableType::Array ? args[i] : std::make_shared<Variable>(args[i]));
+                    scopes.back().get()[functionArgs[i]->expression.second] = var;
+                }
 
             if(func->GetType() == Variable::VariableType::CppFunction)
             {

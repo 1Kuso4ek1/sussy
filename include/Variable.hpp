@@ -33,6 +33,7 @@ public:
     void SetType(VariableType type);
     void SetData(std::any data);
     void SetElement(int index, std::shared_ptr<Variable> element);
+    void Push(std::shared_ptr<Variable> element);
     void Fill(std::any data);
 
     Variable& operator=(std::any data);
@@ -152,6 +153,16 @@ static Variable::VarMap defaultVariables =
                                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>((int)sizeof(std::any_cast<bool>(v["value"]->GetData())), Variable::VariableType::Int); },
                                 [](Variable::VarMap& v) -> std::shared_ptr<Variable> { return std::make_shared<Variable>(v["value"]->GetArraySize(), Variable::VariableType::Int); }
                             }, v);
+                        })) },
+
+    { "push", std::make_shared<Variable>(AST::NodeList{ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "array")),
+                                                        std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                        std::function<std::shared_ptr<Variable>(Variable::VarMap&)>(
+                        [](Variable::VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            if(v["array"]->GetType() == Variable::VariableType::Array)
+                                v["array"]->Push(v["value"]);
+                            return nullptr;
                         })) },
 
     { "srand", std::make_shared<Variable>(AST::NodeList{ }, std::function<std::shared_ptr<Variable>(Variable::VarMap&)>([](Variable::VarMap& v) -> std::shared_ptr<Variable> { srand(int(time(0))); return nullptr; })) },

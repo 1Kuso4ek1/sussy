@@ -54,6 +54,11 @@ void Variable::SetElement(int index, std::shared_ptr<Variable> element)
         array.push_back(element);
 }
 
+void Variable::Push(std::shared_ptr<Variable> element)
+{
+    array.push_back(element);
+}
+
 void Variable::Fill(std::any data)
 {
     if(type == VariableType::Array)
