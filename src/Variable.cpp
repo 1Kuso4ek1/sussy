@@ -59,6 +59,12 @@ void Variable::Push(std::shared_ptr<Variable> element)
     array.push_back(element);
 }
 
+void Variable::RemoveAt(int index)
+{
+    if(index < array.size())
+        array.erase(array.begin() + index);
+}
+
 void Variable::Fill(std::any data)
 {
     if(type == VariableType::Array)

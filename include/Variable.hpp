@@ -34,6 +34,7 @@ public:
     void SetData(std::any data);
     void SetElement(int index, std::shared_ptr<Variable> element);
     void Push(std::shared_ptr<Variable> element);
+    void RemoveAt(int index);
     void Fill(std::any data);
 
     Variable& operator=(std::any data);
@@ -162,6 +163,16 @@ static Variable::VarMap defaultVariables =
                         {
                             if(v["array"]->GetType() == Variable::VariableType::Array)
                                 v["array"]->Push(v["value"]);
+                            return nullptr;
+                        })) },
+
+    { "removeAt", std::make_shared<Variable>(AST::NodeList{ std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "array")),
+                                                            std::make_shared<AST::Node>(std::make_pair(Lexer::Lexeme::Word, "value")) },
+                        std::function<std::shared_ptr<Variable>(Variable::VarMap&)>(
+                        [](Variable::VarMap& v) -> std::shared_ptr<Variable>
+                        {
+                            if(v["array"]->GetType() == Variable::VariableType::Array)
+                                v["array"]->RemoveAt(std::any_cast<int>(v["value"]->GetData()));
                             return nullptr;
                         })) },
 
